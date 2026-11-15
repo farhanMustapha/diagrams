@@ -1,0 +1,113 @@
+{
+  "title": "LOGIGRAMME D'ÉCHANGE — PROCESSUS 7 : GESTION DES FAX ENTRANTS",
+  "subtitle": "Département : Secrétariat  •  Cabinet FIZAZI (Expertise Comptable & CAC)",
+  "config": {
+    "colSpacing": 345,
+    "rowSpacing": 52,
+    "autoBadge": true,
+    "showTitleOnCanvas": true
+  },
+  "actors": [
+    {
+      "id": "act_1",
+      "name": "Émetteur Externe",
+      "type": "box",
+      "highlight": false
+    },
+    {
+      "id": "act_2",
+      "name": "Télécopieur Cabinet",
+      "type": "box",
+      "highlight": false
+    },
+    {
+      "id": "act_3",
+      "name": "Secrétariat (Fatima)",
+      "type": "box",
+      "highlight": true
+    },
+    {
+      "id": "act_4",
+      "name": "Destinataire Interne",
+      "type": "box",
+      "highlight": false
+    }
+  ],
+  "items": [
+    {
+      "id": "stp_1",
+      "kind": "step",
+      "from": "act_1",
+      "to": "act_2",
+      "lineType": "solid",
+      "badge": "1",
+      "label": "Transmission du document",
+      "observation": null
+    },
+    {
+      "id": "stp_2",
+      "kind": "step",
+      "from": "act_2",
+      "to": "act_3",
+      "lineType": "dashed",
+      "badge": "2",
+      "label": "Impression physique automatique du fax entrant",
+      "observation": {
+        "enabled": false,
+        "title": "Impression papier systématique",
+        "detail": "Absence de Fax-to-Email direct : risque de perte de document ou retard de traitement",
+        "alertType": "Amélioration"
+      }
+    },
+    {
+      "id": "stp_3",
+      "kind": "step",
+      "from": "act_3",
+      "to": "act_3",
+      "lineType": "solid",
+      "badge": "3",
+      "label": "Examen, qualification et identification du service concerné",
+      "observation": null
+    },
+    {
+      "id": "stp_4",
+      "kind": "step",
+      "from": "act_3",
+      "to": "act_3",
+      "lineType": "solid",
+      "badge": "4",
+      "label": "Scanner les documents",
+      "observation": {
+        "enabled": false,
+        "title": "Double manipulation physique",
+        "detail": "Numérisation manuelle redondante avec la réception numérique d’origine",
+        "alertType": "Amélioration"
+      }
+    },
+    {
+      "id": "stp_5",
+      "kind": "step",
+      "from": "act_3",
+      "to": "act_4",
+      "lineType": "solid",
+      "badge": "5",
+      "label": "Transmettre le scan à la personne concernée",
+      "observation": null
+    },
+    {
+      "id": "stp_6",
+      "kind": "step",
+      "from": "act_3",
+      "to": "act_3",
+      "lineType": "solid",
+      "badge": "6",
+      "label": "Classement et archivage sur le Drive",
+      "observation": {
+        "enabled": true,
+        "title": "",
+        "detail": "Absence d’un accusé de réception formel du destinataire interne avant archivage",
+        "alertType": "Risque"
+      }
+    }
+  ]
+}

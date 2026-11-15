@@ -984,6 +984,44 @@
       return s.length > maxLen ? s.slice(0, maxLen - 1) + '…' : s;
     }
 
+    function wrapSvgText(text, maxChars = 46) {
+      if (!text) return [];
+      const paragraphs = String(text).split(/\r?\n/);
+      const lines = [];
+
+      paragraphs.forEach(para => {
+        const trimmed = para.trim();
+        if (!trimmed) return;
+        const words = trimmed.split(/\s+/);
+        let currentLine = '';
+
+        words.forEach(word => {
+          while (word.length > maxChars) {
+            if (currentLine) {
+              lines.push(currentLine);
+              currentLine = '';
+            }
+            lines.push(word.slice(0, maxChars));
+            word = word.slice(maxChars);
+          }
+          if (!word) return;
+
+          if (!currentLine) {
+            currentLine = word;
+          } else if ((currentLine + ' ' + word).length <= maxChars) {
+            currentLine += ' ' + word;
+          } else {
+            lines.push(currentLine);
+            currentLine = word;
+          }
+        });
+
+        if (currentLine) lines.push(currentLine);
+      });
+
+      return lines;
+    }
+
     function showToast(msg, isError = false) {
       const toast = document.getElementById('toastBanner');
       document.getElementById('toastText').textContent = msg;
@@ -1040,8 +1078,8 @@
 
       // Colonne des encarts d'observation à droite (identique à la maquette)
       const obsBoxX = lastActorX + 115;
-      const obsBoxW = 285;
-      const rightEdgeMargin = hasAnyObservations ? (obsBoxW + 150) : 140;
+      const obsBoxW = 340;
+      const rightEdgeMargin = hasAnyObservations ? (obsBoxW + 60) : 140;
 
       const computedWidth = Math.max(
         1180,
@@ -1107,11 +1145,36 @@
             const x1 = actorXMap[item.from];
             const x2 = actorXMap[item.to];
             const anchorX = isSelf ? (x1 + 38) : (Math.max(x1, x2) + 12);
+
+            const obs = item.observation;
+            const obsHeader = obs.title && obs.title.trim().length > 0
+              ? `OBSERVATION: ${obs.title.trim()}`
+              : 'OBSERVATION:';
+            const obsDetail = obs.detail || '';
+
+            const headerLines = wrapSvgText(obsHeader, 42);
+            const detailLines = wrapSvgText(obsDetail, 46);
+
+            const headerLineHeight = 15;
+            const detailLineHeight = 14;
+            const padTop = 10;
+            const padBottom = 10;
+            const gap = (headerLines.length > 0 && detailLines.length > 0) ? 5 : 0;
+            const totalContentH = (headerLines.length * headerLineHeight) + gap + (detailLines.length * detailLineHeight);
+            const boxH = Math.max(46, padTop + totalContentH + padBottom);
+
             activeObservations.push({
               stepItem: item,
               badgeNum,
               y: currentY,
-              anchorX
+              anchorX,
+              headerLines,
+              detailLines,
+              headerLineHeight,
+              detailLineHeight,
+              padTop,
+              gap,
+              boxH
             });
           }
 
@@ -1133,10 +1196,22 @@
         currentY += 24;
       }
 
+      let prevBoxBottom = -Infinity;
+      let maxObsBottom = 0;
+      activeObservations.forEach((obsEntry) => {
+        let boxY = Math.round(obsEntry.y - obsEntry.boxH / 2);
+        if (boxY < prevBoxBottom + 8) {
+          boxY = prevBoxBottom + 8;
+        }
+        obsEntry.renderedBoxY = boxY;
+        prevBoxBottom = boxY + obsEntry.boxH;
+        maxObsBottom = Math.max(maxObsBottom, prevBoxBottom);
+      });
+
       const lifelineEndY = Math.max(currentY + 26, 480);
       const hasMatrix = activeObservations.length > 0;
       const matrixHeight = hasMatrix ? (60 + activeObservations.length * 40 + 20) : 0;
-      const computedHeight = lifelineEndY + 34 + matrixHeight;
+      const computedHeight = Math.max(lifelineEndY + 34 + matrixHeight, maxObsBottom + 30 + matrixHeight);
 
       baseSvgWidth = computedWidth;
       baseSvgHeight = computedHeight;
@@ -1304,32 +1379,42 @@
 
       // Encarts bleus d'OBSERVATION à droite reliés par une ligne pointillée bleue
       activeObservations.forEach((obsEntry) => {
-        const { stepItem, y, anchorX } = obsEntry;
-        const obs = stepItem.observation;
+        const { stepItem, y, anchorX, headerLines, detailLines, headerLineHeight, detailLineHeight, padTop, gap, boxH, renderedBoxY } = obsEntry;
         const isSel = selectedItemId === stepItem.id;
-        const boxH = 44;
-        const boxY = y - 16;
-
-        const obsHeader = obs.title && obs.title.trim().length > 0
-          ? `OBSERVATION: ${obs.title.trim()}`
-          : 'OBSERVATION:';
-        const obsDetail = obs.detail || '';
+        const boxY = renderedBoxY;
 
         out += `<g class="svg-interactive" data-select-id="${stepItem.id}" data-select-type="obs">`;
-        // Point d'ancrage bleu + ligne pointillée horizontale vers la boîte
+
+        // Point d'ancrage bleu + ligne pointillée vers la boîte
+        const lineTargetY = Math.min(Math.max(y, boxY + 14), boxY + boxH - 14);
         out += `<circle cx="${anchorX}" cy="${y}" r="2.8" fill="#0ea5e9" />`;
-        out += `<line x1="${anchorX + 4}" y1="${y}" x2="${obsBoxX}" y2="${y}" stroke="#0284c7" stroke-width="1.3" stroke-dasharray="3,3" />`;
+        out += `<path d="M ${anchorX + 4} ${y} L ${obsBoxX} ${lineTargetY}" stroke="#0284c7" stroke-width="1.3" stroke-dasharray="3,3" fill="none" />`;
 
         // Encadré bleu foncé arrondi
-        out += `<rect x="${obsBoxX}" y="${boxY}" width="${obsBoxW}" height="${boxH}" rx="5" fill="#0c2638" stroke="${isSel ? '#38bdf8' : '#0284c7'}" stroke-width="${isSel ? '1.8' : '1.2'}" />`;
+        out += `<rect x="${obsBoxX}" y="${boxY}" width="${obsBoxW}" height="${boxH}" rx="6" fill="#0c2638" stroke="${isSel ? '#38bdf8' : '#0284c7'}" stroke-width="${isSel ? '1.8' : '1.2'}" />`;
 
         // Badge carré bleu clair avec "i"
         out += `<rect x="${obsBoxX + 10}" y="${boxY + 9}" width="13" height="13" rx="2.5" fill="#38bdf8" />`;
         out += `<text x="${obsBoxX + 16.5}" y="${boxY + 19}" text-anchor="middle" fill="#0c2638" font-size="10" font-weight="800">i</text>`;
 
-        // Texte OBSERVATION + détail
-        out += `<text x="${obsBoxX + 29}" y="${boxY + 19}" fill="#7dd3fc" font-size="11" font-weight="700">${escapeXml(truncateText(obsHeader, 42))}</text>`;
-        out += `<text x="${obsBoxX + 29}" y="${boxY + 34}" fill="#e0f2fe" font-size="10.5" font-weight="400">${escapeXml(truncateText(obsDetail, 46))}</text>`;
+        // Texte intégral (titre + description multilignes sans aucune coupure)
+        const textX = obsBoxX + 29;
+        let curY = boxY + padTop + 10;
+
+        headerLines.forEach((line) => {
+          out += `<text x="${textX}" y="${curY}" fill="#7dd3fc" font-size="11" font-weight="700">${escapeXml(line)}</text>`;
+          curY += headerLineHeight;
+        });
+
+        if (gap > 0 && detailLines.length > 0) {
+          curY += gap - 2;
+        }
+
+        detailLines.forEach((line) => {
+          out += `<text x="${textX}" y="${curY}" fill="#e0f2fe" font-size="10.5" font-weight="400">${escapeXml(line)}</text>`;
+          curY += detailLineHeight;
+        });
+
         out += `</g>`;
       });
 
@@ -1628,7 +1713,7 @@
                   </select>
                 </div>
                 <input type="text" data-obs-title="${item.id}" value="${escapeHtml(item.observation.title || '')}" class="form-input" style="font-size:11px;padding:4px 7px;" placeholder="Titre court (optionnel)..." />
-                <input type="text" data-obs-detail="${item.id}" value="${escapeHtml(item.observation.detail || '')}" class="form-input" style="font-size:11px;padding:4px 7px;" placeholder="Description de l'observation..." />
+                <textarea data-obs-detail="${item.id}" class="form-input" rows="2" style="font-size:11px;padding:4px 7px;resize:vertical;" placeholder="Description de l'observation...">${escapeHtml(item.observation.detail || '')}</textarea>
               </div>
             ` : ''}
           </div>
@@ -1826,7 +1911,7 @@
               <option value="Risque" ${obs.alertType === 'Risque' ? 'selected' : ''}>Type : Risque</option>
             </select>
             <input type="text" data-obs-tab-title="${item.id}" value="${escapeHtml(obs.title || '')}" class="form-input" placeholder="Titre court (ex: Salle non prête)..." />
-            <input type="text" data-obs-tab-detail="${item.id}" value="${escapeHtml(obs.detail || '')}" class="form-input" placeholder="Détail de l'observation..." />
+            <textarea data-obs-tab-detail="${item.id}" class="form-input" rows="3" style="font-size:11.5px;padding:6px 8px;resize:vertical;" placeholder="Détail complet de l'observation...">${escapeHtml(obs.detail || '')}</textarea>
           </div>
         `;
       }).join('');

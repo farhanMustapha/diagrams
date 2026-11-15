@@ -1,0 +1,184 @@
+{
+  "title": "Processus d'Accueil des Visiteurs & Gestion des RDV",
+  "subtitle": "",
+  "config": {
+    "colSpacing": 245,
+    "rowSpacing": 54,
+    "autoBadge": true,
+    "showTitleOnCanvas": true
+  },
+  "actors": [
+    {
+      "id": "act_1",
+      "name": "Client / Visiteur Externe",
+      "type": "actor_box"
+    },
+    {
+      "id": "act_2",
+      "name": "Secrétariat (Fatima)",
+      "type": "participant"
+    },
+    {
+      "id": "act_3",
+      "name": "Manager / Partner / M. FIZAZI",
+      "type": "participant"
+    },
+    {
+      "id": "act_4",
+      "name": "Salle de Réunion",
+      "type": "participant"
+    }
+  ],
+  "items": [
+    {
+      "id": "stp_1",
+      "kind": "step",
+      "from": "act_1",
+      "to": "act_2",
+      "lineType": "solid",
+      "badge": "1",
+      "label": "1. Arrivée physique à l'accueil du cabinet",
+      "observation": null
+    },
+    {
+      "id": "stp_2",
+      "kind": "step",
+      "from": "act_2",
+      "to": "act_2",
+      "lineType": "solid",
+      "badge": "2",
+      "label": "2. Accueil & Vérification de l'existence d'un RDV",
+      "observation": {
+        "enabled": true,
+        "title": "",
+        "detail": "Absence d'un moyen de prise des RDV",
+        "alertType": "Amélioration"
+      }
+    },
+    {
+      "id": "alt_1",
+      "kind": "alt_start",
+      "tag": "alt",
+      "condition": "Visite sans rendez-vous préalable"
+    },
+    {
+      "id": "stp_4",
+      "kind": "step",
+      "from": "act_2",
+      "to": "act_3",
+      "lineType": "solid",
+      "badge": "3",
+      "label": "4a. Informer la personne concerné / disponibilité",
+      "observation": {
+        "enabled": true,
+        "title": "",
+        "detail": "visite sans RDV",
+        "alertType": "Amélioration"
+      }
+    },
+    {
+      "id": "alt_2",
+      "kind": "alt_start",
+      "tag": "alt",
+      "condition": "Manager / Fizazi refuse"
+    },
+    {
+      "id": "stp_5",
+      "kind": "step",
+      "from": "act_3",
+      "to": "act_2",
+      "lineType": "dashed",
+      "badge": "4",
+      "label": "5a. Refus de recevoir le visiteur",
+      "observation": null
+    },
+    {
+      "id": "stp_6",
+      "kind": "step",
+      "from": "act_2",
+      "to": "act_1",
+      "lineType": "dashed",
+      "badge": "5",
+      "label": "6a. Prise de rendez-vous ultérieur",
+      "observation": null
+    },
+    {
+      "id": "alt_2_else",
+      "kind": "alt_else",
+      "condition": "Manager / Fizazi accepte à titre exceptionnel"
+    },
+    {
+      "id": "stp_7",
+      "kind": "step",
+      "from": "act_3",
+      "to": "act_2",
+      "lineType": "dashed",
+      "badge": "6",
+      "label": "5b. Accord pour réceptionner le visiteur",
+      "observation": null
+    },
+    {
+      "id": "alt_2_end",
+      "kind": "alt_end"
+    },
+    {
+      "id": "alt_1_end",
+      "kind": "alt_end"
+    },
+    {
+      "id": "alt_3",
+      "kind": "alt_start",
+      "tag": "alt",
+      "condition": "Visite avec rendez-vous confirmé"
+    },
+    {
+      "id": "stp_8",
+      "kind": "step",
+      "from": "act_2",
+      "to": "act_3",
+      "lineType": "solid",
+      "badge": "7",
+      "label": "3b. Signalement de l'arrivée du client",
+      "observation": null
+    },
+    {
+      "id": "stp_9",
+      "kind": "step",
+      "from": "act_2",
+      "to": "act_4",
+      "lineType": "solid",
+      "badge": "8",
+      "label": "4b. Vérification de la mise en place de la salle de réunion",
+      "observation": {
+        "enabled": true,
+        "title": "Salle non prête ou occupée",
+        "detail": "Absence moyen gestion de la salle des réunions",
+        "alertType": "Amélioration"
+      }
+    },
+    {
+      "id": "stp_10",
+      "kind": "step",
+      "from": "act_1",
+      "to": "act_4",
+      "lineType": "solid",
+      "badge": "9",
+      "label": "5c. Installation du client en salle de réunion avec boissons d'accueil",
+      "observation": null
+    },
+    {
+      "id": "stp_11",
+      "kind": "step",
+      "from": "act_3",
+      "to": "act_4",
+      "lineType": "solid",
+      "badge": "10",
+      "label": "6c. Entrée du Manager / Partner pour la réunion",
+      "observation": null
+    },
+    {
+      "id": "alt_3_end",
+      "kind": "alt_end"
+    }
+  ]
+}
