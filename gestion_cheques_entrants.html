@@ -1,0 +1,2554 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Processus : Gestion des Chèques Entrants</title>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    html, body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background-color: #1e1e1e;
+      color: #e5e5e5;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #181818;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #3d3d3d;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #555555;
+    }
+
+    /* Top Header Toolbar */
+    .top-header {
+      height: 54px;
+      min-height: 54px;
+      background-color: #252526;
+      border-bottom: 1px solid #383838;
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      z-index: 20;
+      flex-shrink: 0;
+    }
+
+    .header-left, .header-center, .header-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #ffffff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Navigation Switcher between Diagrams */
+    .header-nav {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      background-color: #1a1a1d;
+      padding: 3px;
+      border-radius: 8px;
+      border: 1px solid #383940;
+    }
+
+    .nav-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 11px;
+      border-radius: 6px;
+      font-size: 11.5px;
+      font-weight: 500;
+      color: #9ca3af;
+      text-decoration: none;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+
+    .nav-link:hover {
+      color: #ffffff;
+      background-color: #27282f;
+    }
+
+    .nav-link.active {
+      color: #ffffff;
+      background-color: #2563eb;
+      font-weight: 600;
+      box-shadow: 0 1px 3px rgba(37, 99, 235, 0.4);
+    }
+
+    .title-input-header {
+      background-color: #1e1e1e;
+      border: 1px solid #3f3f46;
+      border-radius: 7px;
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 5px 10px;
+      width: 240px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .title-input-header:focus {
+      border-color: #3b82f6;
+    }
+
+    .save-status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: #a1a1aa;
+      background-color: #1e1e1e;
+      border: 1px solid #343438;
+      padding: 4px 9px;
+      border-radius: 9999px;
+      white-space: nowrap;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: #10b981;
+      flex-shrink: 0;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12.5px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid #424242;
+      background-color: #333333;
+      color: #e5e5e5;
+      transition: background-color 0.15s, border-color 0.15s;
+      white-space: nowrap;
+    }
+
+    .btn:hover:not(:disabled) {
+      background-color: #424242;
+    }
+
+    .btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background-color: #2563eb;
+      border-color: #3b82f6;
+      color: #ffffff;
+      font-weight: 600;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: #1d4ed8;
+    }
+
+    .btn-success {
+      background-color: #059669;
+      border-color: #10b981;
+      color: #ffffff;
+      font-weight: 600;
+    }
+
+    .btn-success:hover:not(:disabled) {
+      background-color: #047857;
+    }
+
+    .btn-danger {
+      background-color: rgba(127, 29, 29, 0.55);
+      border-color: rgba(185, 28, 28, 0.6);
+      color: #fca5a5;
+    }
+
+    .btn-danger:hover:not(:disabled) {
+      background-color: rgba(153, 27, 27, 0.8);
+    }
+
+    .btn-xs {
+      padding: 3px 7px;
+      font-size: 11px;
+      border-radius: 6px;
+    }
+
+    /* Zoom Control Pill */
+    .zoom-group {
+      display: flex;
+      align-items: center;
+      background-color: #1e1e1e;
+      border: 1px solid #383838;
+      border-radius: 8px;
+      padding: 2px;
+      gap: 2px;
+    }
+
+    .zoom-btn {
+      background: transparent;
+      border: none;
+      color: #d4d4d4;
+      padding: 4px 9px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12.5px;
+      font-weight: 600;
+    }
+
+    .zoom-btn:hover {
+      background-color: #333333;
+      color: #ffffff;
+    }
+
+    .zoom-label {
+      font-size: 12px;
+      font-family: monospace;
+      color: #d4d4d4;
+      min-width: 48px;
+      text-align: center;
+    }
+
+    /* Main Workspace Flex Container */
+    .main-workspace {
+      display: flex;
+      flex: 1;
+      width: 100vw;
+      height: calc(100vh - 54px);
+      min-height: 0;
+      min-width: 0;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Collapsible Left Editor Sidebar (340px sleek width) */
+    .editor-sidebar {
+      width: 340px;
+      min-width: 340px;
+      max-width: 340px;
+      flex-shrink: 0;
+      height: 100%;
+      background-color: #252526;
+      border-right: 1px solid #383838;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      z-index: 15;
+    }
+
+    .editor-sidebar.collapsed {
+      display: none;
+    }
+
+    /* Sidebar Tabs */
+    .sidebar-tabs {
+      display: flex;
+      background-color: #1f1f20;
+      border-bottom: 1px solid #383838;
+      padding: 8px 8px 0 8px;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 8px 6px;
+      border-radius: 8px 8px 0 0;
+      font-size: 12px;
+      font-weight: 500;
+      background: transparent;
+      color: #9ca3af;
+      border: 1px solid transparent;
+      border-bottom: none;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .tab-btn:hover {
+      color: #e5e5e5;
+    }
+
+    .tab-btn.active {
+      background-color: #252526;
+      color: #ffffff;
+      font-weight: 600;
+      border-color: #383838;
+    }
+
+    .tab-pane {
+      display: none;
+      flex: 1;
+      flex-direction: column;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .tab-pane.active {
+      display: flex;
+    }
+
+    .pane-toolbar {
+      padding: 10px 12px;
+      background-color: #2a2a2c;
+      border-bottom: 1px solid #383838;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      flex-wrap: wrap;
+      flex-shrink: 0;
+    }
+
+    .pane-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* Editor Cards */
+    .card {
+      background-color: #2d2d30;
+      border: 1px solid #3e3e42;
+      border-radius: 10px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .card.selected {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.45);
+    }
+
+    .card.alt-card {
+      background-color: rgba(120, 53, 15, 0.2);
+      border-color: rgba(217, 119, 6, 0.45);
+    }
+
+    .card.alt-card.selected {
+      border-color: #3b82f6;
+    }
+
+    .card.obs-card {
+      background-color: rgba(14, 55, 115, 0.2);
+      border-color: rgba(2, 132, 199, 0.45);
+    }
+
+    .card.obs-card.selected {
+      border-color: #38bdf8;
+    }
+
+    /* Observation Box inside Step Card */
+    .obs-subbox {
+      background-color: rgba(12, 74, 110, 0.25);
+      border: 1px solid rgba(2, 132, 199, 0.45);
+      border-radius: 8px;
+      padding: 7px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .card.indented {
+      margin-left: 10px;
+      border-left: 3px solid rgba(245, 158, 11, 0.55);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .card-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .form-input, .form-select {
+      width: 100%;
+      background-color: #1e1e1e;
+      border: 1px solid #454545;
+      border-radius: 7px;
+      padding: 6px 8px;
+      font-size: 12px;
+      color: #f3f4f6;
+      outline: none;
+    }
+
+    .form-input:focus, .form-select:focus {
+      border-color: #3b82f6;
+    }
+
+    .route-row {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .badge-pill {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background-color: #ffffff;
+      color: #18181b;
+      font-size: 11px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* Diagram Viewport - Guaranteed Flex Sizing */
+    .diagram-viewport {
+      flex: 1;
+      min-width: 0;
+      min-height: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      display: flex;
+      justify-content: flex-start;
+      align-items: flex-start;
+      padding: 32px;
+      background-color: #1e1e1e;
+      position: relative;
+    }
+
+    .svg-stage {
+      display: inline-block;
+      flex-shrink: 0;
+      background-color: #1e1e1e;
+      border: 1px solid #2e2e2e;
+      border-radius: 8px;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.55);
+    }
+
+    #sequenceSvg {
+      display: block;
+      background-color: #1e1e1e;
+    }
+
+    /* Interactive SVG hover cues */
+    .svg-interactive {
+      cursor: pointer;
+    }
+    .svg-interactive:hover .hover-highlight {
+      opacity: 1;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #2d2d30;
+      border: 1px solid #4e4e52;
+      color: #ffffff;
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-size: 12.5px;
+      font-weight: 500;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toast.visible {
+      opacity: 1;
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(0, 0, 0, 0.72);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 16px;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-box {
+      background-color: #252526;
+      border: 1px solid #444444;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 430px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+    }
+
+    .usb-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11.5px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      background-color: rgba(37, 99, 235, 0.14);
+      border: 1px solid rgba(59, 130, 246, 0.35);
+      color: #93c5fd;
+    }
+
+    .usb-badge.connected {
+      background-color: rgba(5, 150, 105, 0.16);
+      border-color: rgba(16, 185, 129, 0.4);
+      color: #6ee7b7;
+    }
+
+    @media (max-width: 900px) {
+      .save-status-pill {
+        display: none;
+      }
+      .title-input-header {
+        width: 160px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .editor-sidebar {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 310px;
+        min-width: 310px;
+        box-shadow: 10px 0 30px rgba(0, 0, 0, 0.7);
+      }
+      .header-title {
+        max-width: 150px;
+      }
+      .diagram-viewport {
+        padding: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation & Action Toolbar -->
+  <header class="top-header">
+    <div class="header-left">
+      <a href="index.html" class="btn" style="text-decoration:none;" title="Retour au portail d'accueil">🏠 Portail</a>
+      <button id="toggleSidebarBtn" class="btn" title="Masquer/Afficher l'éditeur">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h10"/>
+        </svg>
+        <span id="toggleSidebarLabel">Éditeur</span>
+      </button>
+      <input type="text" id="headerDiagramTitle" class="title-input-header" value="LOGIGRAMME D'ÉCHANGE — PROCESSUS : GESTION DES CHÈQUES ENTRANTS" placeholder="Titre du diagramme..." title="Titre affiché en haut du diagramme" />
+      <span id="saveStatusPill" class="save-status-pill" title="État de la sauvegarde">
+        <span id="saveStatusDot" class="status-dot"></span>
+        <span id="saveStatusText">Sauvegardé localement</span>
+      </span>
+    </div>
+
+    <div class="header-center">
+      <div class="zoom-group">
+        <button id="zoomOutBtn" class="zoom-btn" title="Zoom arrière (50% min)">−</button>
+        <span id="zoomLabel" class="zoom-label">100%</span>
+        <button id="zoomInBtn" class="zoom-btn" title="Zoom avant (150% max)">+</button>
+        <button id="zoomFitBtn" class="zoom-btn" title="Ajuster à l'écran">Ajuster</button>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <button id="quickUsbSaveBtn" class="btn" title="Sauvegarder sur clé USB / Fichier portable (.json)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+          <polyline points="17 21 17 13 7 13 7 21"/>
+          <polyline points="7 3 7 8 15 8"/>
+        </svg>
+        <span>Clé USB</span>
+      </button>
+      <button id="exportSvgBtn" class="btn" title="Exporter en SVG avec titre">
+        <span>SVG</span>
+      </button>
+      <button id="exportPngBtn" class="btn btn-success" title="Exporter en Image PNG avec titre">
+        <span>Exporter Image</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <div class="main-workspace">
+
+    <!-- Collapsible Left Editor Sidebar -->
+    <aside id="editorSidebar" class="editor-sidebar">
+      <div class="sidebar-tabs">
+        <button class="tab-btn active" data-tab="steps">Étapes (<span id="stepCountBadge">15</span>)</button>
+        <button class="tab-btn" data-tab="actors">Acteurs (<span id="actorCountBadge">5</span>)</button>
+        <button class="tab-btn" data-tab="alt">Bloc Alt</button>
+        <button class="tab-btn" data-tab="obs">Observations (<span id="obsCountBadge">0</span>)</button>
+        <button class="tab-btn" data-tab="usb">USB & Options</button>
+      </div>
+
+      <!-- Tab 1: Steps -->
+      <div id="tab-steps" class="tab-pane active">
+        <div class="pane-toolbar">
+          <button id="addStepBtn" class="btn btn-primary btn-xs">+ Étape</button>
+          <button id="addAltBtn" class="btn btn-xs" style="color:#fcd34d;border-color:#92400e;">+ Bloc [alt]</button>
+          <label style="display:flex;align-items:center;gap:4px;font-size:11px;color:#d4d4d4;cursor:pointer;">
+            <input type="checkbox" id="autoBadgeToggle" checked />
+            <span>Auto N°</span>
+          </label>
+        </div>
+        <div id="stepsListContainer" class="pane-scroll"></div>
+      </div>
+
+      <!-- Tab 2: Actors -->
+      <div id="tab-actors" class="tab-pane">
+        <div class="pane-toolbar">
+          <span style="font-size:11.5px;color:#a3a3a3;">Acteurs (Gauche → Droite)</span>
+          <button id="addActorBtn" class="btn btn-primary btn-xs">+ Acteur</button>
+        </div>
+        <div id="actorsListContainer" class="pane-scroll"></div>
+      </div>
+
+      <!-- Tab 3: Dedicated Alt Block Editor -->
+      <div id="tab-alt" class="tab-pane">
+        <div class="pane-toolbar">
+          <span style="font-size:11.5px;color:#fcd34d;font-weight:600;">Conditions Alternatives [alt]</span>
+          <button id="addAltTabBtn" class="btn btn-xs" style="color:#fcd34d;border-color:#92400e;">+ Nouveau [alt]</button>
+        </div>
+        <div id="altBlocksContainer" class="pane-scroll"></div>
+      </div>
+
+      <!-- Tab 4: Observations & Synthesis Matrix -->
+      <div id="tab-obs" class="tab-pane">
+        <div class="pane-toolbar">
+          <span style="font-size:11.5px;color:#38bdf8;font-weight:600;">Encarts d'Observation Bleus</span>
+          <button id="addObsTabBtn" class="btn btn-primary btn-xs">+ Observation</button>
+        </div>
+        <div id="observationsListContainer" class="pane-scroll"></div>
+      </div>
+
+      <!-- Tab 5: USB Mobile Storage & Options -->
+      <div id="tab-usb" class="tab-pane">
+        <div class="pane-scroll">
+          <!-- Portable USB Storage Card -->
+          <div class="card">
+            <div style="font-size:12.5px;font-weight:600;color:#fff;display:flex;align-items:center;gap:6px;">
+              <span>Stockage Mobile Clé USB (Multi-PC)</span>
+            </div>
+            <p style="font-size:11.5px;color:#a3a3a3;line-height:1.45;">
+              Enregistrez votre travail sur une clé USB pour le rouvrir et le modifier sur n'importe quel autre ordinateur.
+            </p>
+            <div id="usbLinkStatus" class="usb-badge">
+              <span>Aucun fichier USB lié directement</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <button id="usbSaveDirectBtn" class="btn btn-primary btn-xs" style="width:100%;padding:7px;">
+                Sauvegarder sur Clé USB (.json)
+              </button>
+              <button id="usbOpenDirectBtn" class="btn btn-xs" style="width:100%;padding:7px;">
+                Ouvrir depuis Clé USB (.json)
+              </button>
+              <input type="file" id="uploadJsonInput" accept=".json" style="display:none;" />
+            </div>
+          </div>
+
+          <!-- Title & Dimensions Card -->
+          <div class="card">
+            <div style="font-size:12.5px;font-weight:600;color:#fff;">Titre & Affichage</div>
+            <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#e5e5e5;cursor:pointer;">
+              <input type="checkbox" id="showTitleOnCanvasToggle" checked />
+              <span>Afficher le titre en haut sur l'écran</span>
+            </label>
+            <div style="font-size:11px;color:#9ca3af;">
+              Note : Lors de l'exportation en image, le titre choisi est toujours inscrit en haut du diagramme.
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:11px;color:#a3a3a3;margin-bottom:4px;">
+                <span>Espacement horizontal</span>
+                <span id="colSpacingVal" style="color:#60a5fa;font-family:monospace;">250 px</span>
+              </div>
+              <input type="range" id="colSpacingRange" min="195" max="380" step="5" value="250" style="width:100%;" />
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:11px;color:#a3a3a3;margin-bottom:4px;">
+                <span>Espacement vertical</span>
+                <span id="rowSpacingVal" style="color:#60a5fa;font-family:monospace;">54 px</span>
+              </div>
+              <input type="range" id="rowSpacingRange" min="42" max="76" step="2" value="54" style="width:100%;" />
+            </div>
+          </div>
+
+          <!-- Reset Card -->
+          <div class="card">
+            <div style="font-size:12.5px;font-weight:600;color:#fff;">Réinitialisation</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+              <button id="resetOriginalBtn" class="btn btn-xs">Modèle par défaut</button>
+              <button id="clearAllBtn" class="btn btn-danger btn-xs">Vider tout</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Scrollable Diagram Canvas Viewport -->
+    <main id="diagramViewport" class="diagram-viewport">
+      <div id="svgStage" class="svg-stage">
+        <svg id="sequenceSvg" xmlns="http://www.w3.org/2000/svg" width="1280" height="1180" viewBox="0 0 1280 1180"></svg>
+      </div>
+    </main>
+
+  </div>
+
+  <!-- Toast Banner -->
+  <div id="toastBanner" class="toast">
+    <span id="toastDot" style="width:8px;height:8px;border-radius:50%;background:#10b981;"></span>
+    <span id="toastText">Action effectuée</span>
+  </div>
+
+  <!-- Custom Confirmation Modal -->
+  <div id="confirmModal" class="modal-backdrop">
+    <div class="modal-box">
+      <h3 id="confirmTitle" style="font-size:15px;font-weight:600;color:#fff;">Confirmation</h3>
+      <p id="confirmMessage" style="font-size:13px;color:#d4d4d4;line-height:1.45;"></p>
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:4px;">
+        <button id="confirmCancelBtn" class="btn">Annuler</button>
+        <button id="confirmOkBtn" class="btn btn-primary">Confirmer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Export Image / SVG Modal with Diagram Name Input -->
+  <div id="exportModal" class="modal-backdrop">
+    <div class="modal-box">
+      <h3 id="exportModalTitle" style="font-size:15.5px;font-weight:600;color:#fff;">Exporter le diagramme en image</h3>
+      <p style="font-size:12.5px;color:#a3a3a3;line-height:1.45;">
+        Saisissez le nom du diagramme. Ce nom apparaîtra <strong style="color:#fff;">tout en haut du diagramme</strong> et servira de nom de fichier.
+      </p>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <label for="exportDiagramNameInput" style="font-size:11.5px;font-weight:600;color:#d4d4d4;">Nom / Titre du diagramme :</label>
+        <input type="text" id="exportDiagramNameInput" class="form-input" style="font-size:13px;padding:8px 10px;" placeholder="Ex: LOGIGRAMME D'ÉCHANGE — PROCESSUS : GESTION DES CHÈQUES ENTRANTS" />
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <label for="exportSubtitleInput" style="font-size:11.5px;font-weight:600;color:#d4d4d4;">Sous-titre ou date (optionnel) :</label>
+        <input type="text" id="exportSubtitleInput" class="form-input" style="font-size:12px;padding:7px 10px;" placeholder="Ex: Procédure Bureau d'Ordre — Réf. AO" />
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:6px;">
+        <button id="exportCancelBtn" class="btn">Annuler</button>
+        <button id="exportConfirmBtn" class="btn btn-success">Télécharger l'image</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * Modèle exact d'après la nouvelle image de l'utilisateur
+     * (5 acteurs avec icône personnage, 15 étapes numérotées, 1 bloc conditionnel alt/else)
+     */
+    function getDefaultDiagramData() {
+      return {
+        "title": "LOGIGRAMME D'ÉCHANGE — PROCESSUS : GESTION DES CHÈQUES ENTRANTS",
+        "subtitle": "Cabinet FIZAZI (Expertise Comptable & CAC) • Règlements Clients & Remises en Banque",
+        "config": {
+                "colSpacing": 270,
+                "rowSpacing": 50,
+                "autoBadge": true,
+                "showTitleOnCanvas": true
+        },
+        "actors": [
+                {
+                        "id": "act_1",
+                        "name": "Client / Porteur du Chèque",
+                        "type": "actor"
+                },
+                {
+                        "id": "act_2",
+                        "name": "Secrétariat (Fatima)",
+                        "type": "participant"
+                },
+                {
+                        "id": "act_3",
+                        "name": "Comptabilité Interne",
+                        "type": "participant"
+                },
+                {
+                        "id": "act_4",
+                        "name": "Direction (M. FIZAZI)",
+                        "type": "participant"
+                },
+                {
+                        "id": "act_5",
+                        "name": "Agent de liaison (Aziz)",
+                        "type": "actor"
+                },
+                {
+                        "id": "act_6",
+                        "name": "Guichet Bancaire",
+                        "type": "participant"
+                }
+        ],
+        "items": [
+                {
+                        "id": "stp_1",
+                        "kind": "step",
+                        "from": "act_1",
+                        "to": "act_2",
+                        "lineType": "solid",
+                        "badge": "1",
+                        "label": "1. Remise physique du chèque de règlement",
+                        "observation": null
+                },
+                {
+                        "id": "stp_2",
+                        "kind": "step",
+                        "from": "act_2",
+                        "to": "act_1",
+                        "lineType": "dashed",
+                        "badge": "2",
+                        "label": "2. Émission d'un accusé de réception / reçu provisoire",
+                        "observation": {
+                                "enabled": true,
+                                "title": "Sécurisation du reçu",
+                                "detail": "Délivrance systématique d'une souche de reçu numérotée mentionnant le numéro et la banque émettrice du chèque.",
+                                "alertType": "Amélioration"
+                        }
+                },
+                {
+                        "id": "stp_3",
+                        "kind": "step",
+                        "from": "act_2",
+                        "to": "act_2",
+                        "lineType": "solid",
+                        "badge": "3",
+                        "label": "3. Identification précise de la personne ayant déposé le chèque",
+                        "observation": null
+                },
+                {
+                        "id": "stp_4",
+                        "kind": "step",
+                        "from": "act_2",
+                        "to": "act_2",
+                        "lineType": "solid",
+                        "badge": "4",
+                        "label": "4. Numérisation (scan) recto-verso du chèque",
+                        "observation": null
+                },
+                {
+                        "id": "stp_5",
+                        "kind": "step",
+                        "from": "act_2",
+                        "to": "act_2",
+                        "lineType": "solid",
+                        "badge": "5",
+                        "label": "5. Saisie immédiate des informations sur l'État des Valeurs (Journal chèques)",
+                        "observation": null
+                },
+                {
+                        "id": "stp_6",
+                        "kind": "step",
+                        "from": "act_2",
+                        "to": "act_3",
+                        "lineType": "solid",
+                        "badge": "6",
+                        "label": "6. Dépôt physique du chèque auprès du service Compta pour endossement",
+                        "observation": null
+                },
+                {
+                        "id": "stp_7",
+                        "kind": "step",
+                        "from": "act_3",
+                        "to": "act_2",
+                        "lineType": "dashed",
+                        "badge": "7",
+                        "label": "7. Retour du chèque endossé avec cachet commercial au dos",
+                        "observation": null
+                },
+                {
+                        "id": "stp_8",
+                        "kind": "step",
+                        "from": "act_2",
+                        "to": "act_2",
+                        "lineType": "solid",
+                        "badge": "8",
+                        "label": "8. Photocopie du chèque endossé et tirage de l'état des valeurs",
+                        "observation": null
+                },
+                {
+                        "id": "stp_9",
+                        "kind": "step",
+                        "from": "act_2",
+                        "to": "act_4",
+                        "lineType": "solid",
+                        "badge": "9",
+                        "label": "9. Présentation du chèque + État des valeurs à M. FIZAZI pour obtention du VISA",
+                        "observation": {
+                                "enabled": true,
+                                "title": "Contrôle & Visa Direction",
+                                "detail": "Validation impérative du Partner autorisant le dépôt en compte bancaire avant remise à Aziz.",
+                                "alertType": "Amélioration"
+                        }
+                },
+                {
+                        "id": "stp_10",
+                        "kind": "step",
+                        "from": "act_4",
+                        "to": "act_2",
+                        "lineType": "dashed",
+                        "badge": "10",
+                        "label": "10. Visa formel accordé et autorisation de remise en banque",
+                        "observation": null
+                },
+                {
+                        "id": "stp_11",
+                        "kind": "step",
+                        "from": "act_2",
+                        "to": "act_5",
+                        "lineType": "solid",
+                        "badge": "11",
+                        "label": "11. Remise physique du chèque + Bordereau de versement bancaire à Aziz",
+                        "observation": null
+                },
+                {
+                        "id": "stp_12",
+                        "kind": "step",
+                        "from": "act_5",
+                        "to": "act_6",
+                        "lineType": "solid",
+                        "badge": "12",
+                        "label": "12. Dépôt physique au guichet de la banque du cabinet",
+                        "observation": null
+                },
+                {
+                        "id": "stp_13",
+                        "kind": "step",
+                        "from": "act_6",
+                        "to": "act_5",
+                        "lineType": "dashed",
+                        "badge": "13",
+                        "label": "13. Remise du récépissé / bordereau de versement tamponné et daté",
+                        "observation": null
+                },
+                {
+                        "id": "stp_14",
+                        "kind": "step",
+                        "from": "act_5",
+                        "to": "act_2",
+                        "lineType": "dashed",
+                        "badge": "14",
+                        "label": "14. Restitution du bordereau bancaire tamponné au Secrétariat",
+                        "observation": null
+                },
+                {
+                        "id": "stp_15",
+                        "kind": "step",
+                        "from": "act_2",
+                        "to": "act_1",
+                        "lineType": "dashed",
+                        "badge": "15",
+                        "label": "15. Dépôt de l'accusé de remise bancaire auprès du responsable Compta pour lettrage",
+                        "observation": {
+                                "enabled": true,
+                                "title": "Rapprochement et Lettrage",
+                                "detail": "Lettrage comptable rapide dès retour du bordereau tamponné pour éviter les écarts de trésorerie.",
+                                "alertType": "Risque"
+                        }
+                }
+        ]
+};
+    }
+
+    // State initialization (v3 storage key for the updated diagram)
+    const STORAGE_KEY = 'uml_seq_cheques_entrants_v1';
+    let state = loadState() || getDefaultDiagramData();
+    let selectedItemId = null;
+    let currentZoom = 1.0;
+    let baseSvgWidth = 1260;
+    let baseSvgHeight = 1160;
+    let sidebarVisible = true;
+    let usbFileHandle = null; // File System Access API handle for direct USB sync
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        if (parsed && Array.isArray(parsed.actors) && Array.isArray(parsed.items)) {
+          if (typeof parsed.title !== 'string') parsed.title = "LOGIGRAMME D'ÉCHANGE — PROCESSUS : GESTION DES CHÈQUES ENTRANTS";
+          if (typeof parsed.subtitle !== 'string') parsed.subtitle = "Cabinet FIZAZI (Expertise Comptable & CAC) • Règlements Clients & Remises en Banque";
+          if (!parsed.config) parsed.config = { colSpacing: 250, rowSpacing: 54, autoBadge: true, showTitleOnCanvas: true };
+          if (typeof parsed.config.showTitleOnCanvas !== 'boolean') parsed.config.showTitleOnCanvas = true;
+          return parsed;
+        }
+      } catch (e) {}
+      return null;
+    }
+
+    function updateSaveStatus(text, isUsb = false) {
+      const dot = document.getElementById('saveStatusDot');
+      const label = document.getElementById('saveStatusText');
+      if (dot && label) {
+        dot.style.backgroundColor = isUsb ? '#3b82f6' : '#10b981';
+        label.textContent = text;
+      }
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        const timeStr = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        updateSaveStatus(`Sauvegardé (${timeStr})`, false);
+      } catch (e) {}
+    }
+
+    function uid(prefix = 'id') {
+      return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`;
+    }
+
+    function slugifyFilename(str) {
+      const clean = String(str || 'diagramme-sequence')
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-zA-Z0-9_-]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .toLowerCase();
+      return clean || 'diagramme-sequence';
+    }
+
+    function escapeXml(str) {
+      return String(str ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;');
+    }
+
+    function escapeHtml(str) {
+      return String(str ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function truncateText(str, max = 40) {
+      if (!str) return '';
+      return str.length > max ? (str.slice(0, max - 1) + '…') : str;
+    }
+
+    function wrapSvgText(text, maxChars = 46) {
+      if (!text) return [];
+      const paragraphs = String(text).split(/\r?\n/);
+      const lines = [];
+
+      paragraphs.forEach(para => {
+        const trimmed = para.trim();
+        if (!trimmed) return;
+        const words = trimmed.split(/\s+/);
+        let currentLine = '';
+
+        words.forEach(word => {
+          while (word.length > maxChars) {
+            if (currentLine) {
+              lines.push(currentLine);
+              currentLine = '';
+            }
+            lines.push(word.slice(0, maxChars));
+            word = word.slice(maxChars);
+          }
+          if (!word) return;
+
+          if (!currentLine) {
+            currentLine = word;
+          } else if ((currentLine + ' ' + word).length <= maxChars) {
+            currentLine += ' ' + word;
+          } else {
+            lines.push(currentLine);
+            currentLine = word;
+          }
+        });
+
+        if (currentLine) lines.push(currentLine);
+      });
+
+      return lines;
+    }
+
+    function showToast(msg, isError = false) {
+      const toast = document.getElementById('toastBanner');
+      document.getElementById('toastText').textContent = msg;
+      document.getElementById('toastDot').style.backgroundColor = isError ? '#ef4444' : '#10b981';
+      toast.classList.add('visible');
+      clearTimeout(toast._timer);
+      toast._timer = setTimeout(() => toast.classList.remove('visible'), 2500);
+    }
+
+    function openConfirm(title, message, onConfirm) {
+      const modal = document.getElementById('confirmModal');
+      document.getElementById('confirmTitle').textContent = title;
+      document.getElementById('confirmMessage').textContent = message;
+      modal.classList.add('open');
+
+      const close = () => modal.classList.remove('open');
+      document.getElementById('confirmCancelBtn').onclick = close;
+      document.getElementById('confirmOkBtn').onclick = () => {
+        close();
+        onConfirm();
+      };
+    }
+
+    /**
+     * Génération complète du SVG avec titre optionnel ou forcé pour l'exportation
+     */
+    function renderDiagram(options = {}) {
+      const forceTitle = Boolean(options.forceTitle);
+      const customTitle = options.customTitle !== undefined ? options.customTitle : state.title;
+      const customSubtitle = options.customSubtitle !== undefined ? options.customSubtitle : state.subtitle;
+
+      const svg = document.getElementById('sequenceSvg');
+      const actors = state.actors;
+      const items = state.items;
+      const colSpacing = Number(state.config.colSpacing) || 250;
+      const rowSpacing = Number(state.config.rowSpacing) || 54;
+
+      const hasTitleText = String(customTitle || '').trim().length > 0;
+      const displayTitleBlock = hasTitleText && (forceTitle || state.config.showTitleOnCanvas);
+      const hasSubtitleText = displayTitleBlock && String(customSubtitle || '').trim().length > 0;
+
+      const titleAreaHeight = displayTitleBlock ? (hasSubtitleText ? 68 : 52) : 0;
+      const leftMargin = 115;
+      const rightMargin = 205;
+      const topHeaderY = 26 + titleAreaHeight;
+      const lifelineStartY = topHeaderY + 64;
+
+      const actorXMap = {};
+      actors.forEach((act, idx) => {
+        actorXMap[act.id] = leftMargin + idx * colSpacing;
+      });
+
+      const lastActorX = actors.length > 0 ? actorXMap[actors[actors.length - 1].id] : leftMargin + 700;
+      const hasAnyObservations = items.some(it => it.kind === 'step' && it.observation && it.observation.enabled);
+      const obsBoxX = lastActorX + 115;
+      const obsBoxW = 340;
+      const rightEdgeMargin = hasAnyObservations ? (obsBoxW + 60) : rightMargin;
+
+      const computedWidth = Math.max(
+        1120,
+        actors.length > 0
+          ? lastActorX + rightEdgeMargin
+          : 1120
+      );
+
+      let currentY = lifelineStartY + 38;
+      const layoutEntries = [];
+      const altStack = [];
+      let badgeCounter = 1;
+      const activeObservations = [];
+
+      items.forEach((item) => {
+        if (item.kind === 'alt_start') {
+          currentY += 16;
+          const blk = {
+            startItem: item,
+            startY: currentY,
+            elseSections: [],
+            endY: currentY + 64,
+            minX: Infinity,
+            maxX: -Infinity
+          };
+          altStack.push(blk);
+          layoutEntries.push({ type: 'alt_block', block: blk });
+          currentY += 38;
+        } else if (item.kind === 'alt_else') {
+          currentY += 10;
+          if (altStack.length > 0) {
+            altStack[altStack.length - 1].elseSections.push({
+              item,
+              y: currentY
+            });
+          }
+          currentY += 34;
+        } else if (item.kind === 'alt_end') {
+          currentY += 14;
+          if (altStack.length > 0) {
+            altStack.pop().endY = currentY;
+          }
+          currentY += 26;
+        } else if (item.kind === 'step') {
+          const fromIdx = actors.findIndex(a => a.id === item.from);
+          const toIdx = actors.findIndex(a => a.id === item.to);
+          const isValid = fromIdx !== -1 && toIdx !== -1;
+          const isSelf = isValid && item.from === item.to;
+          const badgeNum = state.config.autoBadge ? String(badgeCounter++) : (item.badge || String(badgeCounter++));
+
+          if (isValid && altStack.length > 0) {
+            const x1 = actorXMap[item.from];
+            const x2 = actorXMap[item.to];
+            const spanMin = Math.min(x1, x2);
+            const spanMax = isSelf ? x1 + Math.min(240, colSpacing * 0.85) : Math.max(x1, x2);
+            altStack.forEach(blk => {
+              blk.minX = Math.min(blk.minX, spanMin);
+              blk.maxX = Math.max(blk.maxX, spanMax);
+            });
+          }
+
+          if (isValid && item.observation && item.observation.enabled) {
+            const x1 = actorXMap[item.from];
+            const x2 = actorXMap[item.to];
+            const anchorX = isSelf ? (x1 + 38) : (Math.max(x1, x2) + 12);
+
+            const obs = item.observation;
+            const obsHeader = obs.title && obs.title.trim().length > 0
+              ? `OBSERVATION: ${obs.title.trim()}`
+              : 'OBSERVATION:';
+            const obsDetail = obs.detail || '';
+
+            const headerLines = wrapSvgText(obsHeader, 42);
+            const detailLines = wrapSvgText(obsDetail, 46);
+
+            const headerLineHeight = 15;
+            const detailLineHeight = 14;
+            const padTop = 10;
+            const padBottom = 10;
+            const gap = (headerLines.length > 0 && detailLines.length > 0) ? 5 : 0;
+            const totalContentH = (headerLines.length * headerLineHeight) + gap + (detailLines.length * detailLineHeight);
+            const boxH = Math.max(46, padTop + totalContentH + padBottom);
+
+            activeObservations.push({
+              stepItem: item,
+              badgeNum,
+              y: currentY,
+              anchorX,
+              headerLines,
+              detailLines,
+              headerLineHeight,
+              detailLineHeight,
+              padTop,
+              gap,
+              boxH
+            });
+          }
+
+          layoutEntries.push({
+            type: 'step',
+            item,
+            y: currentY,
+            isValid,
+            isSelf,
+            badgeNum
+          });
+
+          currentY += isSelf ? Math.max(rowSpacing + 8, 60) : rowSpacing;
+        }
+      });
+
+      while (altStack.length > 0) {
+        altStack.pop().endY = currentY + 14;
+        currentY += 28;
+      }
+
+      let prevBoxBottom = -Infinity;
+      let maxObsBottom = 0;
+      activeObservations.forEach((obsEntry) => {
+        let boxY = Math.round(obsEntry.y - obsEntry.boxH / 2);
+        if (boxY < prevBoxBottom + 8) {
+          boxY = prevBoxBottom + 8;
+        }
+        obsEntry.renderedBoxY = boxY;
+        prevBoxBottom = boxY + obsEntry.boxH;
+        maxObsBottom = Math.max(maxObsBottom, prevBoxBottom);
+      });
+
+      const lifelineEndY = Math.max(currentY + 24, 500);
+      const computedHeight = Math.max(lifelineEndY + 36, maxObsBottom + 30);
+
+      baseSvgWidth = computedWidth;
+      baseSvgHeight = computedHeight;
+
+      // Explicit pixel attributes and viewBox on <svg>
+      svg.setAttribute('viewBox', `0 0 ${baseSvgWidth} ${baseSvgHeight}`);
+      applyZoom();
+
+      let out = `
+        <defs>
+          <style>
+            text { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+          </style>
+          <marker id="arrow-head" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+            <path d="M 0 1.2 L 9.5 5 L 0 8.8 z" fill="#d4d4d4" />
+          </marker>
+          <marker id="arrow-head-sel" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 1.2 L 9.5 5 L 0 8.8 z" fill="#60a5fa" />
+          </marker>
+        </defs>
+        <rect x="0" y="0" width="${baseSvgWidth}" height="${baseSvgHeight}" fill="#1e1e1e" />
+      `;
+
+      // Titre et sous-titre en haut du diagramme
+      if (displayTitleBlock) {
+        const centerX = baseSvgWidth / 2;
+        out += `<text x="${centerX}" y="34" text-anchor="middle" fill="#ffffff" font-size="18" font-weight="700" letter-spacing="0.3">${escapeXml(customTitle)}</text>`;
+        if (hasSubtitleText) {
+          out += `<text x="${centerX}" y="54" text-anchor="middle" fill="#a1a1aa" font-size="12" font-weight="400">${escapeXml(customSubtitle)}</text>`;
+        }
+        out += `<line x1="48" y1="${titleAreaHeight + 8}" x2="${baseSvgWidth - 48}" y2="${titleAreaHeight + 8}" stroke="#333333" stroke-width="1" />`;
+      }
+
+      // Vertical dashed lifelines
+      actors.forEach((act) => {
+        const x = actorXMap[act.id];
+        out += `<line x1="${x}" y1="${lifelineStartY}" x2="${x}" y2="${lifelineEndY}" stroke="#666666" stroke-width="1.2" stroke-dasharray="6,6" />`;
+      });
+
+      // Actor Headers
+      actors.forEach((act) => {
+        const x = actorXMap[act.id];
+        const isSel = selectedItemId === act.id;
+        const label = escapeXml(act.name);
+
+        out += `<g class="svg-interactive" data-select-id="${act.id}" data-select-type="actor">`;
+        if (act.type === 'participant') {
+          const boxW = Math.max(125, act.name.length * 7.6 + 26);
+          const boxH = 38;
+          const boxX = x - boxW / 2;
+          const boxY = topHeaderY;
+          out += `
+            <rect x="${boxX}" y="${boxY}" width="${boxW}" height="${boxH}" rx="4"
+              fill="#27272a" stroke="${isSel ? '#60a5fa' : '#52525b'}" stroke-width="${isSel ? '2' : '1.3'}" />
+            <text x="${x}" y="${boxY + 23}" text-anchor="middle" fill="#ffffff" font-size="12" font-weight="600">${label}</text>
+          `;
+        } else {
+          const cy = topHeaderY + 14;
+          out += `
+            <circle cx="${x}" cy="${cy}" r="13" fill="#27272a" stroke="${isSel ? '#60a5fa' : '#71717a'}" stroke-width="${isSel ? '2' : '1.3'}" />
+            <circle cx="${x}" cy="${cy - 3.5}" r="4" fill="none" stroke="${isSel ? '#93c5fd' : '#d4d4d8'}" stroke-width="1.3" />
+            <path d="M ${x - 6.5} ${cy + 7.5} C ${x - 6.5} ${cy + 2.5}, ${x + 6.5} ${cy + 2.5}, ${x + 6.5} ${cy + 7.5}"
+              fill="none" stroke="${isSel ? '#93c5fd' : '#d4d4d8'}" stroke-width="1.3" stroke-linecap="round" />
+            <text x="${x}" y="${topHeaderY + 46}" text-anchor="middle" fill="${isSel ? '#93c5fd' : '#ffffff'}" font-size="12" font-weight="600">${label}</text>
+          `;
+        }
+        out += `</g>`;
+      });
+
+      // Alt Conditional Frames
+      layoutEntries.forEach((entry) => {
+        if (entry.type !== 'alt_block') return;
+        const blk = entry.block;
+        const validMin = blk.minX !== Infinity ? blk.minX : leftMargin;
+        const validMax = blk.maxX !== -Infinity ? blk.maxX : baseSvgWidth - rightMargin;
+        const boxLeft = Math.max(24, validMin - 44);
+        const boxRight = Math.min(baseSvgWidth - 24, validMax + 44);
+        const boxW = Math.max(240, boxRight - boxLeft);
+        const boxH = Math.max(58, blk.endY - blk.startY);
+
+        const isStartSel = selectedItemId === blk.startItem.id;
+        const fullTag = `${blk.startItem.tag || 'alt'} [${blk.startItem.condition || ''}]`;
+        const tabW = Math.min(boxW - 10, Math.max(130, fullTag.length * 6.8 + 26));
+        const tabH = 23;
+
+        out += `<g class="svg-interactive" data-select-id="${blk.startItem.id}" data-select-type="step">`;
+        out += `<rect x="${boxLeft}" y="${blk.startY}" width="${boxW}" height="${boxH}" fill="rgba(255,255,255,0.015)" stroke="${isStartSel ? '#60a5fa' : '#444444'}" stroke-width="${isStartSel ? '1.8' : '1.3'}" />`;
+        out += `<path d="M ${boxLeft} ${blk.startY} L ${boxLeft + tabW} ${blk.startY} L ${boxLeft + tabW} ${blk.startY + tabH - 6} L ${boxLeft + tabW - 6} ${blk.startY + tabH} L ${boxLeft} ${blk.startY + tabH} Z" fill="#2a2a2a" stroke="${isStartSel ? '#60a5fa' : '#444444'}" stroke-width="1.2" />`;
+        out += `<text x="${boxLeft + 10}" y="${blk.startY + 15}" fill="#f3f4f6" font-size="11.5" font-weight="600">${escapeXml(fullTag)}</text>`;
+        out += `</g>`;
+
+        blk.elseSections.forEach((sec) => {
+          const isElseSel = selectedItemId === sec.item.id;
+          const elseText = `[${sec.item.condition || 'else'}]`;
+          out += `<g class="svg-interactive" data-select-id="${sec.item.id}" data-select-type="step">`;
+          out += `<line x1="${boxLeft}" y1="${sec.y}" x2="${boxRight}" y2="${sec.y}" stroke="${isElseSel ? '#60a5fa' : '#555555'}" stroke-width="${isElseSel ? '1.8' : '1.2'}" stroke-dasharray="6,5" />`;
+          out += `<text x="${boxLeft + 12}" y="${sec.y + 17}" fill="${isElseSel ? '#93c5fd' : '#d4d4d4'}" font-size="11.5" font-weight="500">${escapeXml(elseText)}</text>`;
+          out += `</g>`;
+        });
+      });
+
+      // Sequence Steps & White Circular Badges
+      layoutEntries.forEach((entry) => {
+        if (entry.type !== 'step') return;
+        const { item, y, isValid, isSelf, badgeNum } = entry;
+        if (!isValid) return;
+
+        const x1 = actorXMap[item.from];
+        const x2 = actorXMap[item.to];
+        const isSel = selectedItemId === item.id;
+        const strokeCol = isSel ? '#60a5fa' : '#cfcfcf';
+        const marker = isSel ? 'url(#arrow-head-sel)' : 'url(#arrow-head)';
+        const dash = item.lineType === 'dashed' ? 'stroke-dasharray="5,4"' : '';
+        const textCol = isSel ? '#93c5fd' : '#e5e5e5';
+
+        out += `<g class="svg-interactive" data-select-id="${item.id}" data-select-type="step">`;
+
+        if (isSelf) {
+          const loopW = 32;
+          const loopH = 24;
+          const badgeR = 10;
+          out += `<rect class="hover-highlight" x="${x1 - 14}" y="${y - 14}" width="${Math.max(250, item.label.length * 6.3 + 60)}" height="${loopH + 28}" rx="6" fill="rgba(96,165,250,0.09)" opacity="${isSel ? '1' : '0'}" />`;
+          out += `<path d="M ${x1 + badgeR - 1} ${y} L ${x1 + loopW} ${y} L ${x1 + loopW} ${y + loopH} L ${x1 + 5} ${y + loopH}"
+            fill="none" stroke="${strokeCol}" stroke-width="1.3" ${dash} marker-end="${marker}" />`;
+          out += `<text x="${x1 + loopW + 10}" y="${y + loopH / 2 + 4}" text-anchor="start" fill="${textCol}" font-size="11.5" font-weight="400">${escapeXml(item.label)}</text>`;
+          out += `
+            <circle cx="${x1}" cy="${y}" r="${badgeR}" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.2" />
+            <text x="${x1}" y="${y + 3.8}" text-anchor="middle" fill="#111827" font-size="10.5" font-weight="700">${escapeXml(badgeNum)}</text>
+          `;
+        } else {
+          const dir = x2 > x1 ? 1 : -1;
+          const badgeR = 10;
+          const startX = x1 + dir * badgeR;
+          const endX = x2 - dir * 4;
+          const midX = (x1 + x2) / 2;
+          const span = Math.abs(x2 - x1);
+
+          out += `<rect class="hover-highlight" x="${Math.min(x1, x2) - 12}" y="${y - 22}" width="${span + 24}" height="34" rx="6" fill="rgba(96,165,250,0.09)" opacity="${isSel ? '1' : '0'}" />`;
+          out += `<line x1="${startX}" y1="${y}" x2="${endX}" y2="${y}" stroke="${strokeCol}" stroke-width="1.3" ${dash} marker-end="${marker}" />`;
+
+          const estTextW = item.label.length * 6.0;
+          let labelX = midX;
+          let anchor = 'middle';
+          if (estTextW > span - 22) {
+            if (dir === 1) {
+              labelX = x1 + 16;
+              anchor = 'start';
+            } else {
+              labelX = x2 + 16;
+              anchor = 'start';
+            }
+          }
+
+          out += `<text x="${labelX}" y="${y - 8}" text-anchor="${anchor}" fill="${textCol}" font-size="11.5" font-weight="400">${escapeXml(item.label)}</text>`;
+          out += `
+            <circle cx="${x1}" cy="${y}" r="${badgeR}" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.2" />
+            <text x="${x1}" y="${y + 3.8}" text-anchor="middle" fill="#111827" font-size="10.5" font-weight="700">${escapeXml(badgeNum)}</text>
+          `;
+        }
+
+        out += `</g>`;
+      });
+
+      // Encarts bleus d'OBSERVATION à droite reliés par une ligne pointillée bleue
+      activeObservations.forEach((obsEntry) => {
+        const { stepItem, y, anchorX, headerLines, detailLines, headerLineHeight, detailLineHeight, padTop, gap, boxH, renderedBoxY } = obsEntry;
+        const isSel = selectedItemId === stepItem.id;
+        const boxY = renderedBoxY;
+
+        out += `<g class="svg-interactive" data-select-id="${stepItem.id}" data-select-type="obs">`;
+
+        // Point d'ancrage bleu + ligne pointillée vers la boîte
+        const lineTargetY = Math.min(Math.max(y, boxY + 14), boxY + boxH - 14);
+        out += `<circle cx="${anchorX}" cy="${y}" r="2.8" fill="#0ea5e9" />`;
+        out += `<path d="M ${anchorX + 4} ${y} L ${obsBoxX} ${lineTargetY}" stroke="#0284c7" stroke-width="1.3" stroke-dasharray="3,3" fill="none" />`;
+
+        // Encadré bleu foncé arrondi
+        out += `<rect x="${obsBoxX}" y="${boxY}" width="${obsBoxW}" height="${boxH}" rx="6" fill="#0c2638" stroke="${isSel ? '#38bdf8' : '#0284c7'}" stroke-width="${isSel ? '1.8' : '1.2'}" />`;
+
+        // Badge carré bleu clair avec "i"
+        out += `<rect x="${obsBoxX + 10}" y="${boxY + 9}" width="13" height="13" rx="2.5" fill="#38bdf8" />`;
+        out += `<text x="${obsBoxX + 16.5}" y="${boxY + 19}" text-anchor="middle" fill="#0c2638" font-size="10" font-weight="800">i</text>`;
+
+        // Texte intégral (titre + description multilignes sans aucune coupure)
+        const textX = obsBoxX + 29;
+        let curY = boxY + padTop + 10;
+
+        headerLines.forEach((line) => {
+          out += `<text x="${textX}" y="${curY}" fill="#7dd3fc" font-size="11" font-weight="700">${escapeXml(line)}</text>`;
+          curY += headerLineHeight;
+        });
+
+        if (gap > 0 && detailLines.length > 0) {
+          curY += gap - 2;
+        }
+
+        detailLines.forEach((line) => {
+          out += `<text x="${textX}" y="${curY}" fill="#e0f2fe" font-size="10.5" font-weight="400">${escapeXml(line)}</text>`;
+          curY += detailLineHeight;
+        });
+
+        out += `</g>`;
+      });
+
+      svg.innerHTML = out;
+
+      // Click-to-select on SVG elements
+      svg.querySelectorAll('[data-select-id]').forEach(el => {
+        el.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const id = el.getAttribute('data-select-id');
+          const type = el.getAttribute('data-select-type');
+          selectedItemId = id;
+          if (!sidebarVisible) toggleSidebar(true);
+          if (type === 'actor') switchTab('actors');
+          else if (type === 'obs') switchTab('obs');
+          else switchTab('steps');
+          renderSidebar();
+          renderDiagram();
+          setTimeout(() => {
+            const card = document.querySelector(`[data-card-id="${id}"]`);
+            if (card) card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }, 40);
+        });
+      });
+    }
+
+    /**
+     * Apply Zoom by scaling explicit pixel width & height on the <svg>
+     */
+    function applyZoom() {
+      const svg = document.getElementById('sequenceSvg');
+      const scaledW = Math.round(baseSvgWidth * currentZoom);
+      const scaledH = Math.round(baseSvgHeight * currentZoom);
+      svg.setAttribute('width', String(scaledW));
+      svg.setAttribute('height', String(scaledH));
+      document.getElementById('zoomLabel').textContent = `${Math.round(currentZoom * 100)}%`;
+    }
+
+    function setZoom(val) {
+      currentZoom = Math.min(1.5, Math.max(0.5, Math.round(val * 100) / 100));
+      applyZoom();
+    }
+
+    function fitToScreen() {
+      const vp = document.getElementById('diagramViewport');
+      const availW = Math.max(320, vp.clientWidth - 64);
+      const ratio = availW / baseSvgWidth;
+      setZoom(Math.min(1.0, Math.max(0.5, ratio)));
+    }
+
+    /**
+     * Sidebar UI Rendering
+     */
+    function renderSidebar() {
+      renderActorsList();
+      renderStepsList();
+      renderAltBlocksTab();
+      renderObservationsList();
+      document.getElementById('actorCountBadge').textContent = state.actors.length;
+      document.getElementById('stepCountBadge').textContent = state.items.filter(i => i.kind === 'step').length;
+      document.getElementById('obsCountBadge').textContent = state.items.filter(i => i.kind === 'step' && i.observation && i.observation.enabled).length;
+    }
+
+    function renderActorsList() {
+      const container = document.getElementById('actorsListContainer');
+      if (!container) return;
+      if (state.actors.length === 0) {
+        container.innerHTML = `<div style="text-align:center;font-size:12px;color:#9ca3af;padding:20px;">Aucun acteur. Cliquez sur "+ Acteur".</div>`;
+        return;
+      }
+
+      container.innerHTML = state.actors.map((act, idx) => {
+        const isSel = selectedItemId === act.id;
+        return `
+          <div data-card-id="${act.id}" class="card ${isSel ? 'selected' : ''}">
+            <div class="card-header">
+              <span style="font-size:11px;font-weight:700;color:#9ca3af;">ACTEUR #${idx + 1}</span>
+              <div class="card-actions">
+                <button data-act-move="left" data-idx="${idx}" ${idx === 0 ? 'disabled' : ''} class="btn btn-xs" title="Déplacer à gauche">←</button>
+                <button data-act-move="right" data-idx="${idx}" ${idx === state.actors.length - 1 ? 'disabled' : ''} class="btn btn-xs" title="Déplacer à droite">→</button>
+                <button data-act-del="${idx}" class="btn btn-danger btn-xs" title="Supprimer">✕</button>
+              </div>
+            </div>
+            <input type="text" data-act-name="${act.id}" value="${escapeHtml(act.name)}" class="form-input" placeholder="Nom de l'acteur..." />
+            <select data-act-type="${act.id}" class="form-select" style="font-size:11.5px;">
+              <option value="actor" ${act.type !== 'participant' ? 'selected' : ''}>Icône Personnage (Actor)</option>
+              <option value="participant" ${act.type === 'participant' ? 'selected' : ''}>Boîte Rectangulaire (Participant)</option>
+            </select>
+          </div>
+        `;
+      }).join('');
+
+      container.querySelectorAll('[data-act-name]').forEach(inp => {
+        inp.addEventListener('input', (e) => {
+          const act = state.actors.find(a => a.id === e.target.getAttribute('data-act-name'));
+          if (act) {
+            act.name = e.target.value;
+            saveState();
+            renderStepsList();
+            renderDiagram();
+          }
+        });
+      });
+
+      container.querySelectorAll('[data-act-type]').forEach(sel => {
+        sel.addEventListener('change', (e) => {
+          const act = state.actors.find(a => a.id === e.target.getAttribute('data-act-type'));
+          if (act) {
+            act.type = e.target.value;
+            saveState();
+            renderDiagram();
+          }
+        });
+      });
+
+      container.querySelectorAll('[data-act-move]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = Number(btn.getAttribute('data-idx'));
+          const dir = btn.getAttribute('data-act-move');
+          const swapIdx = dir === 'left' ? idx - 1 : idx + 1;
+          if (swapIdx < 0 || swapIdx >= state.actors.length) return;
+          [state.actors[idx], state.actors[swapIdx]] = [state.actors[swapIdx], state.actors[idx]];
+          saveState();
+          renderSidebar();
+          renderDiagram();
+        });
+      });
+
+      container.querySelectorAll('[data-act-del]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = Number(btn.getAttribute('data-act-del'));
+          if (state.actors.length <= 1) {
+            showToast('Impossible de supprimer le dernier acteur', true);
+            return;
+          }
+          const removed = state.actors.splice(idx, 1)[0];
+          const fallbackId = state.actors[0].id;
+          state.items.forEach(it => {
+            if (it.kind === 'step') {
+              if (it.from === removed.id) it.from = fallbackId;
+              if (it.to === removed.id) it.to = fallbackId;
+            }
+          });
+          if (selectedItemId === removed.id) selectedItemId = null;
+          saveState();
+          renderSidebar();
+          renderDiagram();
+          showToast('Acteur supprimé');
+        });
+      });
+    }
+
+    function renderStepsList() {
+      const container = document.getElementById('stepsListContainer');
+      if (state.items.length === 0) {
+        container.innerHTML = `<div style="text-align:center;font-size:12px;color:#9ca3af;padding:20px;">Aucune étape. Cliquez sur "+ Étape".</div>`;
+        return;
+      }
+
+      let badgeCounter = 1;
+      let insideAlt = false;
+
+      container.innerHTML = state.items.map((item, idx) => {
+        const isSel = selectedItemId === item.id;
+        const controls = `
+          <div class="card-actions">
+            <button data-item-move="up" data-idx="${idx}" ${idx === 0 ? 'disabled' : ''} class="btn btn-xs" title="Monter">↑</button>
+            <button data-item-move="down" data-idx="${idx}" ${idx === state.items.length - 1 ? 'disabled' : ''} class="btn btn-xs" title="Descendre">↓</button>
+            <button data-item-del="${idx}" class="btn btn-danger btn-xs" title="Supprimer">✕</button>
+          </div>
+        `;
+
+        if (item.kind === 'alt_start') {
+          insideAlt = true;
+          return `
+            <div data-card-id="${item.id}" class="card alt-card ${isSel ? 'selected' : ''}">
+              <div class="card-header">
+                <span style="font-size:11px;font-weight:700;color:#fcd34d;">DÉBUT BLOC [ALT] (SI)</span>
+                ${controls}
+              </div>
+              <input type="text" data-alt-cond="${item.id}" value="${escapeHtml(item.condition || '')}" class="form-input" placeholder="Condition principale..." />
+            </div>
+          `;
+        }
+
+        if (item.kind === 'alt_else') {
+          return `
+            <div data-card-id="${item.id}" class="card alt-card indented ${isSel ? 'selected' : ''}">
+              <div class="card-header">
+                <span style="font-size:11px;font-weight:700;color:#fbbf24;">SÉPARATEUR [ELSE] (SINON)</span>
+                ${controls}
+              </div>
+              <input type="text" data-alt-cond="${item.id}" value="${escapeHtml(item.condition || '')}" class="form-input" placeholder="Condition alternative..." />
+            </div>
+          `;
+        }
+
+        if (item.kind === 'alt_end') {
+          insideAlt = false;
+          return `
+            <div data-card-id="${item.id}" class="card alt-card ${isSel ? 'selected' : ''}" style="padding:7px 10px;">
+              <div class="card-header">
+                <span style="font-size:11px;font-weight:700;color:#d97706;">FIN BLOC [ALT]</span>
+                ${controls}
+              </div>
+            </div>
+          `;
+        }
+
+        const badgeNum = state.config.autoBadge ? badgeCounter++ : (item.badge || badgeCounter++);
+        const optsFrom = state.actors.map(a => `<option value="${a.id}" ${a.id === item.from ? 'selected' : ''}>${escapeHtml(a.name)}</option>`).join('');
+        const optsTo = state.actors.map(a => `<option value="${a.id}" ${a.id === item.to ? 'selected' : ''}>${escapeHtml(a.name)}</option>`).join('');
+        const hasObs = Boolean(item.observation && item.observation.enabled);
+
+        return `
+          <div data-card-id="${item.id}" class="card ${insideAlt ? 'indented' : ''} ${isSel ? 'selected' : ''}">
+            <div class="card-header">
+              <div style="display:flex;align-items:center;gap:6px;">
+                ${state.config.autoBadge
+                  ? `<span class="badge-pill">${badgeNum}</span>`
+                  : `<input type="text" data-step-badge="${item.id}" value="${escapeHtml(item.badge || badgeNum)}" class="badge-pill" style="border:none;text-align:center;width:24px;" />`
+                }
+                <select data-step-linetype="${item.id}" class="form-select" style="padding:3px 6px;font-size:11px;width:auto;">
+                  <option value="solid" ${item.lineType === 'solid' ? 'selected' : ''}>Pleine (──▶)</option>
+                  <option value="dashed" ${item.lineType === 'dashed' ? 'selected' : ''}>Pointillée (- - ▶)</option>
+                </select>
+                <button data-toggle-obs="${item.id}" class="btn btn-xs" style="${hasObs ? 'background:#0369a1;border-color:#38bdf8;color:#fff;' : 'color:#7dd3fc;'}" title="Ajouter/Retirer un encart Observation bleu">
+                  ${hasObs ? 'Obs ✓' : '+ Obs'}
+                </button>
+              </div>
+              ${controls}
+            </div>
+            <div class="route-row">
+              <select data-step-from="${item.id}" class="form-select" style="font-size:11px;">${optsFrom}</select>
+              <span style="color:#9ca3af;font-weight:700;font-size:12px;">→</span>
+              <select data-step-to="${item.id}" class="form-select" style="font-size:11px;">${optsTo}</select>
+            </div>
+            <input type="text" data-step-label="${item.id}" value="${escapeHtml(item.label)}" class="form-input" placeholder="Libellé du message..." />
+            ${hasObs ? `
+              <div class="obs-subbox">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                  <span style="font-size:10.5px;font-weight:700;color:#7dd3fc;">ENCART OBSERVATION BLEU</span>
+                  <select data-obs-alert="${item.id}" class="form-select" style="width:auto;padding:2px 6px;font-size:10.5px;">
+                    <option value="Amélioration" ${(item.observation.alertType || 'Amélioration') === 'Amélioration' ? 'selected' : ''}>Amélioration</option>
+                    <option value="Risque" ${item.observation.alertType === 'Risque' ? 'selected' : ''}>Risque</option>
+                  </select>
+                </div>
+                <input type="text" data-obs-title="${item.id}" value="${escapeHtml(item.observation.title || '')}" class="form-input" style="font-size:11px;padding:4px 7px;" placeholder="Titre court (optionnel)..." />
+                <textarea data-obs-detail="${item.id}" class="form-input" rows="2" style="font-size:11px;padding:4px 7px;resize:vertical;" placeholder="Description de l'observation...">${escapeHtml(item.observation.detail || '')}</textarea>
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+
+      container.querySelectorAll('[data-toggle-obs]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const it = state.items.find(x => x.id === btn.getAttribute('data-toggle-obs'));
+          if (!it) return;
+          if (it.observation && it.observation.enabled) {
+            it.observation.enabled = false;
+            showToast('Observation masquée');
+          } else {
+            it.observation = {
+              enabled: true,
+              title: it.observation?.title || '',
+              detail: it.observation?.detail || 'Nouvelle observation sur cette étape',
+              alertType: it.observation?.alertType || 'Amélioration'
+            };
+            showToast('Observation ajoutée');
+          }
+          saveState();
+          renderSidebar();
+          renderDiagram();
+        });
+      });
+
+      container.querySelectorAll('[data-obs-title]').forEach(inp => {
+        inp.addEventListener('input', (e) => {
+          const it = state.items.find(x => x.id === e.target.getAttribute('data-obs-title'));
+          if (it && it.observation) { it.observation.title = e.target.value; saveState(); renderObservationsList(); renderDiagram(); }
+        });
+      });
+
+      container.querySelectorAll('[data-obs-detail]').forEach(inp => {
+        inp.addEventListener('input', (e) => {
+          const it = state.items.find(x => x.id === e.target.getAttribute('data-obs-detail'));
+          if (it && it.observation) { it.observation.detail = e.target.value; saveState(); renderObservationsList(); renderDiagram(); }
+        });
+      });
+
+      container.querySelectorAll('[data-obs-alert]').forEach(sel => {
+        sel.addEventListener('change', (e) => {
+          const it = state.items.find(x => x.id === e.target.getAttribute('data-obs-alert'));
+          if (it && it.observation) { it.observation.alertType = e.target.value; saveState(); renderObservationsList(); renderDiagram(); }
+        });
+      });
+
+      container.querySelectorAll('[data-step-label]').forEach(inp => {
+        inp.addEventListener('input', (e) => {
+          const it = state.items.find(x => x.id === e.target.getAttribute('data-step-label'));
+          if (it) { it.label = e.target.value; saveState(); renderDiagram(); }
+        });
+      });
+
+      container.querySelectorAll('[data-step-badge]').forEach(inp => {
+        inp.addEventListener('input', (e) => {
+          const it = state.items.find(x => x.id === e.target.getAttribute('data-step-badge'));
+          if (it) { it.badge = e.target.value; saveState(); renderDiagram(); }
+        });
+      });
+
+      container.querySelectorAll('[data-step-from]').forEach(sel => {
+        sel.addEventListener('change', (e) => {
+          const it = state.items.find(x => x.id === e.target.getAttribute('data-step-from'));
+          if (it) { it.from = e.target.value; saveState(); renderDiagram(); }
+        });
+      });
+
+      container.querySelectorAll('[data-step-to]').forEach(sel => {
+        sel.addEventListener('change', (e) => {
+          const it = state.items.find(x => x.id === e.target.getAttribute('data-step-to'));
+          if (it) { it.to = e.target.value; saveState(); renderDiagram(); }
+        });
+      });
+
+      container.querySelectorAll('[data-step-linetype]').forEach(sel => {
+        sel.addEventListener('change', (e) => {
+          const it = state.items.find(x => x.id === e.target.getAttribute('data-step-linetype'));
+          if (it) { it.lineType = e.target.value; saveState(); renderDiagram(); }
+        });
+      });
+
+      container.querySelectorAll('[data-alt-cond]').forEach(inp => {
+        inp.addEventListener('input', (e) => {
+          const it = state.items.find(x => x.id === e.target.getAttribute('data-alt-cond'));
+          if (it) {
+            it.condition = e.target.value;
+            saveState();
+            renderAltBlocksTab();
+            renderDiagram();
+          }
+        });
+      });
+
+      container.querySelectorAll('[data-item-move]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = Number(btn.getAttribute('data-idx'));
+          const dir = btn.getAttribute('data-item-move');
+          const swapIdx = dir === 'up' ? idx - 1 : idx + 1;
+          if (swapIdx < 0 || swapIdx >= state.items.length) return;
+          [state.items[idx], state.items[swapIdx]] = [state.items[swapIdx], state.items[idx]];
+          saveState();
+          renderSidebar();
+          renderDiagram();
+        });
+      });
+
+      container.querySelectorAll('[data-item-del]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = Number(btn.getAttribute('data-item-del'));
+          state.items.splice(idx, 1);
+          saveState(); renderSidebar(); renderDiagram();
+          showToast('Élément supprimé');
+        });
+      });
+    }
+
+    /**
+     * Onglet dédié à la gestion des blocs conditionnels [alt] / [else]
+     */
+    function renderAltBlocksTab() {
+      const container = document.getElementById('altBlocksContainer');
+      if (!container) return;
+
+      const altItems = state.items
+        .map((item, idx) => ({ item, idx }))
+        .filter(entry => entry.item.kind === 'alt_start' || entry.item.kind === 'alt_else');
+
+      if (altItems.length === 0) {
+        container.innerHTML = `<div style="text-align:center;font-size:12px;color:#9ca3af;padding:20px;">Aucun bloc conditionnel [alt]. Cliquez sur "+ Nouveau [alt]".</div>`;
+        return;
+      }
+
+      container.innerHTML = altItems.map(({ item, idx }) => {
+        const isStart = item.kind === 'alt_start';
+        return `
+          <div class="card alt-card">
+            <div class="card-header">
+              <span style="font-size:11px;font-weight:700;color:${isStart ? '#fcd34d' : '#fbbf24'};">
+                ${isStart ? 'CONDITION PRINCIPALE [ALT]' : 'BRANCHE ALTERNATIVE [ELSE]'}
+              </span>
+              <div class="card-actions">
+                ${isStart ? `<button data-add-else-after="${idx}" class="btn btn-xs" title="Ajouter une branche [else]">+ Else</button>` : ''}
+                <button data-alt-tab-del="${idx}" class="btn btn-danger btn-xs" title="Supprimer">✕</button>
+              </div>
+            </div>
+            <input type="text" data-alt-tab-cond="${item.id}" value="${escapeHtml(item.condition || '')}" class="form-input" placeholder="Condition..." />
+          </div>
+        `;
+      }).join('');
+
+      container.querySelectorAll('[data-alt-tab-cond]').forEach(inp => {
+        inp.addEventListener('input', (e) => {
+          const it = state.items.find(x => x.id === e.target.getAttribute('data-alt-tab-cond'));
+          if (it) {
+            it.condition = e.target.value;
+            saveState();
+            renderStepsList();
+            renderDiagram();
+          }
+        });
+      });
+
+      container.querySelectorAll('[data-add-else-after]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const startIdx = Number(btn.getAttribute('data-add-else-after'));
+          let insertIdx = startIdx + 1;
+          let depth = 1;
+          while (insertIdx < state.items.length && depth > 0) {
+            if (state.items[insertIdx].kind === 'alt_start') depth++;
+            else if (state.items[insertIdx].kind === 'alt_end') {
+              depth--;
+              if (depth === 0) break;
+            }
+            insertIdx++;
+          }
+          state.items.splice(insertIdx, 0, {
+            id: uid('else'),
+            kind: 'alt_else',
+            condition: 'Autre condition'
+          });
+          saveState();
+          renderSidebar();
+          renderDiagram();
+          showToast('Branche [else] ajoutée');
+        });
+      });
+
+      container.querySelectorAll('[data-alt-tab-del]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = Number(btn.getAttribute('data-alt-tab-del'));
+          state.items.splice(idx, 1);
+          saveState();
+          renderSidebar();
+          renderDiagram();
+          showToast('Condition supprimée');
+        });
+      });
+    }
+
+    /**
+     * Onglet dédié à la gestion des Observations et de la Matrice des Risques
+     */
+    function renderObservationsList() {
+      const container = document.getElementById('observationsListContainer');
+      if (!container) return;
+
+      const allSteps = [];
+      let badgeCounter = 1;
+      state.items.forEach(item => {
+        if (item.kind === 'step') {
+          const num = state.config.autoBadge ? String(badgeCounter++) : (item.badge || String(badgeCounter++));
+          allSteps.push({ id: item.id, badgeNum: num, label: item.label });
+        }
+      });
+
+      const obsEntries = [];
+      state.items.forEach(item => {
+        if (item.kind === 'step' && item.observation && item.observation.enabled) {
+          const stp = allSteps.find(s => s.id === item.id);
+          obsEntries.push({ item, num: stp ? stp.badgeNum : '?' });
+        }
+      });
+
+      const addObsBtn = document.getElementById('addObsTabBtn');
+      if (addObsBtn) {
+        addObsBtn.onclick = () => {
+          const steps = state.items.filter(it => it.kind === 'step');
+          if (steps.length === 0) {
+            showToast('Aucune étape disponible', true);
+            return;
+          }
+          let targetStep = steps.find(it => !it.observation || !it.observation.enabled);
+          if (!targetStep) targetStep = steps[0];
+          targetStep.observation = {
+            enabled: true,
+            title: '',
+            detail: 'Nouvelle observation sur cette étape',
+            alertType: 'Amélioration'
+          };
+          selectedItemId = targetStep.id;
+          saveState();
+          renderSidebar();
+          renderDiagram();
+          showToast('Observation créée');
+        };
+      }
+
+      if (obsEntries.length === 0) {
+        container.innerHTML = `<div style="text-align:center;font-size:12px;color:#9ca3af;padding:20px;">Aucune observation active. Cliquez sur "+ Observation" ci-dessus ou sur "+ Obs" sur une étape pour en ajouter une.</div>`;
+        return;
+      }
+
+      container.innerHTML = obsEntries.map(({ item, num }) => {
+        const obs = item.observation;
+        const isSel = selectedItemId === item.id;
+        const stepOpts = allSteps.map(s => `
+          <option value="${s.id}" ${s.id === item.id ? 'selected' : ''}>
+            Étape ${s.badgeNum} : ${escapeHtml(truncateText(s.label, 28))}
+          </option>
+        `).join('');
+
+        return `
+          <div data-card-id="${item.id}" class="card obs-card ${isSel ? 'selected' : ''}">
+            <div class="card-header">
+              <div style="display:flex;align-items:center;gap:6px;">
+                <span class="badge-pill">${num}</span>
+                <span style="font-size:11px;font-weight:700;color:#7dd3fc;">OBSERVATION</span>
+              </div>
+              <button data-obs-remove="${item.id}" class="btn btn-danger btn-xs" title="Supprimer cette observation">✕</button>
+            </div>
+            <div>
+              <label style="font-size:10.5px;color:#9ca3af;display:block;margin-bottom:3px;">Liée à l'étape :</label>
+              <select data-obs-link-step="${item.id}" class="form-select" style="font-size:11px;">
+                ${stepOpts}
+              </select>
+            </div>
+            <select data-obs-tab-alert="${item.id}" class="form-select" style="font-size:11px;">
+              <option value="Amélioration" ${(obs.alertType || 'Amélioration') === 'Amélioration' ? 'selected' : ''}>Type : Amélioration</option>
+              <option value="Risque" ${obs.alertType === 'Risque' ? 'selected' : ''}>Type : Risque</option>
+            </select>
+            <input type="text" data-obs-tab-title="${item.id}" value="${escapeHtml(obs.title || '')}" class="form-input" placeholder="Titre court (ex: Visa Partner)..." />
+            <textarea data-obs-tab-detail="${item.id}" class="form-input" rows="3" style="font-size:11.5px;padding:6px 8px;resize:vertical;" placeholder="Détail complet de l'observation...">${escapeHtml(obs.detail || '')}</textarea>
+          </div>
+        `;
+      }).join('');
+
+      container.querySelectorAll('[data-obs-link-step]').forEach(sel => {
+        sel.addEventListener('change', (e) => {
+          const fromId = e.target.getAttribute('data-obs-link-step');
+          const toId = e.target.value;
+          if (fromId === toId) return;
+          const fromStep = state.items.find(x => x.id === fromId);
+          const toStep = state.items.find(x => x.id === toId);
+          if (fromStep && toStep) {
+            toStep.observation = fromStep.observation;
+            fromStep.observation = null;
+            selectedItemId = toStep.id;
+            saveState();
+            renderSidebar();
+            renderDiagram();
+            showToast('Observation liée à la nouvelle étape');
+          }
+        });
+      });
+
+      container.querySelectorAll('[data-obs-tab-title]').forEach(inp => {
+        inp.addEventListener('input', (e) => {
+          const it = state.items.find(x => x.id === e.target.getAttribute('data-obs-tab-title'));
+          if (it && it.observation) { it.observation.title = e.target.value; saveState(); renderStepsList(); renderDiagram(); }
+        });
+      });
+
+      container.querySelectorAll('[data-obs-tab-detail]').forEach(inp => {
+        inp.addEventListener('input', (e) => {
+          const it = state.items.find(x => x.id === e.target.getAttribute('data-obs-tab-detail'));
+          if (it && it.observation) { it.observation.detail = e.target.value; saveState(); renderStepsList(); renderDiagram(); }
+        });
+      });
+
+      container.querySelectorAll('[data-obs-tab-alert]').forEach(sel => {
+        sel.addEventListener('change', (e) => {
+          const it = state.items.find(x => x.id === e.target.getAttribute('data-obs-tab-alert'));
+          if (it && it.observation) { it.observation.alertType = e.target.value; saveState(); renderStepsList(); renderDiagram(); }
+        });
+      });
+
+      container.querySelectorAll('[data-obs-remove]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const it = state.items.find(x => x.id === btn.getAttribute('data-obs-remove'));
+          if (it && it.observation) {
+            it.observation.enabled = false;
+            saveState();
+            renderSidebar();
+            renderDiagram();
+            showToast('Observation supprimée');
+          }
+        });
+      });
+    }
+
+    /**
+     * Stockage Mobile Clé USB (File System Access API + Repli Fichier Portable .json)
+     */
+    function updateUsbStatusUI(fileName) {
+      const el = document.getElementById('usbLinkStatus');
+      if (!el) return;
+      if (fileName) {
+        el.classList.add('connected');
+        el.innerHTML = `<span>Clé USB liée : <strong>${escapeHtml(fileName)}</strong></span>`;
+      } else {
+        el.classList.remove('connected');
+        el.innerHTML = `<span>Mode portable prêt (export/import .json)</span>`;
+      }
+    }
+
+    async function saveToUsb() {
+      const payload = JSON.stringify(state, null, 2);
+      const suggestedName = `${slugifyFilename(state.title)}.json`;
+
+      // Try direct write to linked USB handle or showSaveFilePicker if supported
+      if (window.showSaveFilePicker) {
+        try {
+          if (!usbFileHandle) {
+            usbFileHandle = await window.showSaveFilePicker({
+              suggestedName,
+              types: [{
+                description: 'Diagramme de Séquence UML (.json)',
+                accept: { 'application/json': ['.json'] }
+              }]
+            });
+          }
+          const writable = await usbFileHandle.createWritable();
+          await writable.write(payload);
+          await writable.close();
+          updateUsbStatusUI(usbFileHandle.name);
+          updateSaveStatus(`Enregistré sur USB (${usbFileHandle.name})`, true);
+          showToast(`Sauvegardé sur la clé USB : ${usbFileHandle.name}`);
+          return;
+        } catch (err) {
+          if (err && err.name === 'AbortError') return;
+          usbFileHandle = null;
+        }
+      }
+
+      // Universal fallback download for USB flash drive transfer
+      const blob = new Blob([payload], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = suggestedName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      updateSaveStatus('Fichier USB téléchargé', true);
+      showToast(`Fichier "${suggestedName}" prêt à copier sur votre clé USB`);
+    }
+
+    async function openFromUsb() {
+      if (window.showOpenFilePicker) {
+        try {
+          const [handle] = await window.showOpenFilePicker({
+            types: [{
+              description: 'Diagramme de Séquence UML (.json)',
+              accept: { 'application/json': ['.json'] }
+            }],
+            multiple: false
+          });
+          const file = await handle.getFile();
+          const text = await file.text();
+          const parsed = JSON.parse(text);
+          if (parsed && Array.isArray(parsed.actors) && Array.isArray(parsed.items)) {
+            usbFileHandle = handle;
+            state = parsed;
+            if (typeof state.title !== 'string') state.title = "LOGIGRAMME D'ÉCHANGE — PROCESSUS : GESTION DES CHÈQUES ENTRANTS";
+            if (typeof state.subtitle !== 'string') state.subtitle = "";
+            selectedItemId = null;
+            syncInputsFromState();
+            saveState();
+            renderSidebar();
+            renderDiagram();
+            fitToScreen();
+            updateUsbStatusUI(handle.name);
+            updateSaveStatus(`Chargé depuis USB (${handle.name})`, true);
+            showToast(`Diagramme chargé depuis : ${handle.name}`);
+          } else {
+            showToast('Fichier JSON invalide', true);
+          }
+          return;
+        } catch (err) {
+          if (err && err.name === 'AbortError') return;
+        }
+      }
+
+      document.getElementById('uploadJsonInput').click();
+    }
+
+    /**
+     * Modale d'exportation d'image / SVG avec saisie du nom affiché tout en haut
+     */
+    let pendingExportFormat = 'png';
+
+    function openExportModal(format) {
+      pendingExportFormat = format;
+      const modal = document.getElementById('exportModal');
+      const titleEl = document.getElementById('exportModalTitle');
+      const confirmBtn = document.getElementById('exportConfirmBtn');
+      const nameInput = document.getElementById('exportDiagramNameInput');
+      const subInput = document.getElementById('exportSubtitleInput');
+
+      titleEl.textContent = format === 'png'
+        ? 'Exporter le diagramme en Image (PNG)'
+        : 'Exporter le diagramme en Vectoriel (SVG)';
+      confirmBtn.textContent = format === 'png'
+        ? 'Télécharger le PNG'
+        : 'Télécharger le SVG';
+
+      nameInput.value = state.title || "LOGIGRAMME D'ÉCHANGE — PROCESSUS : GESTION DES CHÈQUES ENTRANTS";
+      subInput.value = state.subtitle || '';
+      modal.classList.add('open');
+      setTimeout(() => {
+        nameInput.focus();
+        nameInput.select();
+      }, 40);
+    }
+
+    function executeExportWithTitle() {
+      const nameInput = document.getElementById('exportDiagramNameInput');
+      const subInput = document.getElementById('exportSubtitleInput');
+      const chosenTitle = nameInput.value.trim() || 'Diagramme de Séquence';
+      const chosenSub = subInput.value.trim();
+
+      state.title = chosenTitle;
+      state.subtitle = chosenSub;
+      document.getElementById('headerDiagramTitle').value = chosenTitle;
+      saveState();
+
+      document.getElementById('exportModal').classList.remove('open');
+
+      if (pendingExportFormat === 'svg') {
+        exportSvg(chosenTitle, chosenSub);
+      } else {
+        exportPng(chosenTitle, chosenSub);
+      }
+    }
+
+    function exportSvg(diagramTitle, diagramSubtitle) {
+      const prevSel = selectedItemId;
+      selectedItemId = null;
+      renderDiagram({ forceTitle: true, customTitle: diagramTitle, customSubtitle: diagramSubtitle });
+
+      const svg = document.getElementById('sequenceSvg');
+      const clone = svg.cloneNode(true);
+      clone.setAttribute('width', String(baseSvgWidth));
+      clone.setAttribute('height', String(baseSvgHeight));
+
+      const serializer = new XMLSerializer();
+      let source = serializer.serializeToString(clone);
+      if (!source.match(/^<svg[^>]+xmlns="http:\/\/www\.w3\.org\/2000\/svg"/)) {
+        source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
+      }
+
+      const fileName = `${slugifyFilename(diagramTitle)}.svg`;
+      const blob = new Blob(['<?xml version="1.0" encoding="UTF-8"?>\n' + source], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      selectedItemId = prevSel;
+      renderDiagram();
+      showToast(`SVG exporté : ${fileName}`);
+    }
+
+    function exportPng(diagramTitle, diagramSubtitle) {
+      const prevSel = selectedItemId;
+      selectedItemId = null;
+      renderDiagram({ forceTitle: true, customTitle: diagramTitle, customSubtitle: diagramSubtitle });
+
+      const svg = document.getElementById('sequenceSvg');
+      const clone = svg.cloneNode(true);
+      clone.setAttribute('width', String(baseSvgWidth));
+      clone.setAttribute('height', String(baseSvgHeight));
+
+      const serializer = new XMLSerializer();
+      let source = serializer.serializeToString(clone);
+      if (!source.match(/^<svg[^>]+xmlns="http:\/\/www\.w3\.org\/2000\/svg"/)) {
+        source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
+      }
+
+      const fileName = `${slugifyFilename(diagramTitle)}.png`;
+      const svgBlob = new Blob([source], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(svgBlob);
+      const img = new Image();
+
+      img.onload = () => {
+        const scale = 2;
+        const canvas = document.createElement('canvas');
+        canvas.width = baseSvgWidth * scale;
+        canvas.height = baseSvgHeight * scale;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#1e1e1e';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.scale(scale, scale);
+        ctx.drawImage(img, 0, 0);
+        URL.revokeObjectURL(url);
+
+        canvas.toBlob((blob) => {
+          if (!blob) {
+            showToast('Erreur export PNG', true);
+            return;
+          }
+          const pngUrl = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = pngUrl;
+          a.download = fileName;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(pngUrl);
+
+          selectedItemId = prevSel;
+          renderDiagram();
+          showToast(`Image exportée : ${fileName}`);
+        }, 'image/png');
+      };
+
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        selectedItemId = prevSel;
+        renderDiagram();
+        showToast('Erreur de rendu PNG', true);
+      };
+
+      img.src = url;
+    }
+
+    function syncInputsFromState() {
+      document.getElementById('headerDiagramTitle').value = state.title || '';
+      document.getElementById('autoBadgeToggle').checked = Boolean(state.config.autoBadge);
+      document.getElementById('showTitleOnCanvasToggle').checked = state.config.showTitleOnCanvas !== false;
+      document.getElementById('colSpacingRange').value = state.config.colSpacing;
+      document.getElementById('colSpacingVal').textContent = `${state.config.colSpacing} px`;
+      document.getElementById('rowSpacingRange').value = state.config.rowSpacing;
+      document.getElementById('rowSpacingVal').textContent = `${state.config.rowSpacing} px`;
+    }
+
+    function switchTab(name) {
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-tab') === name);
+      });
+      document.querySelectorAll('.tab-pane').forEach(pane => {
+        pane.classList.toggle('active', pane.id === `tab-${name}`);
+      });
+    }
+
+    function toggleSidebar(force) {
+      sidebarVisible = typeof force === 'boolean' ? force : !sidebarVisible;
+      const sb = document.getElementById('editorSidebar');
+      sb.classList.toggle('collapsed', !sidebarVisible);
+      document.getElementById('toggleSidebarLabel').textContent = sidebarVisible ? "Masquer l'éditeur" : "Afficher l'éditeur";
+    }
+
+    /**
+     * Initialization on DOMContentLoaded
+     */
+    window.addEventListener('DOMContentLoaded', () => {
+      syncInputsFromState();
+
+      document.getElementById('headerDiagramTitle').addEventListener('input', (e) => {
+        state.title = e.target.value;
+        saveState();
+        renderDiagram();
+      });
+
+      document.getElementById('showTitleOnCanvasToggle').addEventListener('change', (e) => {
+        state.config.showTitleOnCanvas = e.target.checked;
+        saveState();
+        renderDiagram();
+      });
+
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => switchTab(btn.getAttribute('data-tab')));
+      });
+
+      document.getElementById('toggleSidebarBtn').addEventListener('click', () => toggleSidebar());
+
+      document.getElementById('diagramViewport').addEventListener('click', (e) => {
+        if (e.target.id === 'diagramViewport' || e.target.id === 'sequenceSvg') {
+          selectedItemId = null;
+          renderSidebar();
+          renderDiagram();
+        }
+      });
+
+      document.getElementById('addActorBtn').addEventListener('click', () => {
+        const act = { id: uid('act'), name: `Acteur ${state.actors.length + 1}`, type: 'actor' };
+        state.actors.push(act);
+        selectedItemId = act.id;
+        saveState(); renderSidebar(); renderDiagram();
+        showToast('Nouvel acteur ajouté');
+      });
+
+      document.getElementById('addStepBtn').addEventListener('click', () => {
+        if (state.actors.length === 0) return;
+        const fromId = state.actors[0].id;
+        const toId = state.actors.length > 1 ? state.actors[1].id : fromId;
+        const n = state.items.filter(i => i.kind === 'step').length + 1;
+        const stp = { id: uid('stp'), kind: 'step', from: fromId, to: toId, lineType: 'solid', badge: String(n), label: `${n}. Nouvelle étape` };
+        state.items.push(stp);
+        selectedItemId = stp.id;
+        saveState(); renderSidebar(); renderDiagram();
+        const sc = document.getElementById('stepsListContainer');
+        sc.scrollTop = sc.scrollHeight;
+        showToast('Étape ajoutée');
+      });
+
+      const triggerAddAlt = () => {
+        const f = state.actors[0]?.id || 'act_1';
+        const t = state.actors[1]?.id || f;
+        const s1 = { id: uid('alt'), kind: 'alt_start', tag: 'alt', condition: 'Condition 1' };
+        const m1 = { id: uid('stp'), kind: 'step', from: f, to: t, lineType: 'solid', badge: '', label: 'Action si condition 1' };
+        const el = { id: uid('else'), kind: 'alt_else', condition: 'Condition 2' };
+        const m2 = { id: uid('stp'), kind: 'step', from: t, to: f, lineType: 'dashed', badge: '', label: 'Action sinon' };
+        const en = { id: uid('end'), kind: 'alt_end' };
+        state.items.push(s1, m1, el, m2, en);
+        selectedItemId = s1.id;
+        saveState(); renderSidebar(); renderDiagram();
+        const sc = document.getElementById('stepsListContainer');
+        sc.scrollTop = sc.scrollHeight;
+        showToast('Bloc [alt] ajouté');
+      };
+
+      document.getElementById('addAltBtn').addEventListener('click', triggerAddAlt);
+      document.getElementById('addAltTabBtn').addEventListener('click', triggerAddAlt);
+
+      document.getElementById('autoBadgeToggle').addEventListener('change', (e) => {
+        state.config.autoBadge = e.target.checked;
+        saveState(); renderSidebar(); renderDiagram();
+      });
+
+      document.getElementById('colSpacingRange').addEventListener('input', (e) => {
+        state.config.colSpacing = Number(e.target.value);
+        document.getElementById('colSpacingVal').textContent = `${state.config.colSpacing} px`;
+        saveState(); renderDiagram();
+      });
+
+      document.getElementById('rowSpacingRange').addEventListener('input', (e) => {
+        state.config.rowSpacing = Number(e.target.value);
+        document.getElementById('rowSpacingVal').textContent = `${state.config.rowSpacing} px`;
+        saveState(); renderDiagram();
+      });
+
+      document.getElementById('resetOriginalBtn').addEventListener('click', () => {
+        openConfirm('Réinitialiser le diagramme ?', 'Restaurer le modèle exact avec les 15 étapes ?', () => {
+          state = getDefaultDiagramData();
+          selectedItemId = null;
+          usbFileHandle = null;
+          updateUsbStatusUI(null);
+          syncInputsFromState();
+          saveState(); renderSidebar(); renderDiagram();
+          fitToScreen();
+          showToast('Modèle restauré');
+        });
+      });
+
+      document.getElementById('clearAllBtn').addEventListener('click', () => {
+        openConfirm('Vider le diagramme ?', 'Supprimer toutes les étapes actuelles ?', () => {
+          state = {
+            title: state.title,
+            subtitle: state.subtitle,
+            config: { ...state.config },
+            actors: [
+              { id: 'act_a', name: 'Acteur 1', type: 'actor' },
+              { id: 'act_b', name: 'Acteur 2', type: 'actor' }
+            ],
+            items: []
+          };
+          selectedItemId = null;
+          saveState(); renderSidebar(); renderDiagram();
+          showToast('Diagramme vidé');
+        });
+      });
+
+      // USB / Portable File Controls
+      document.getElementById('quickUsbSaveBtn').addEventListener('click', saveToUsb);
+      document.getElementById('usbSaveDirectBtn').addEventListener('click', saveToUsb);
+      document.getElementById('usbOpenDirectBtn').addEventListener('click', openFromUsb);
+
+      document.getElementById('uploadJsonInput').addEventListener('change', (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          try {
+            const parsed = JSON.parse(ev.target.result);
+            if (parsed && Array.isArray(parsed.actors) && Array.isArray(parsed.items)) {
+              state = parsed;
+              if (typeof state.title !== 'string') state.title = "LOGIGRAMME D'ÉCHANGE — PROCESSUS : GESTION DES CHÈQUES ENTRANTS";
+              if (typeof state.subtitle !== 'string') state.subtitle = "";
+              selectedItemId = null;
+              syncInputsFromState();
+              saveState(); renderSidebar(); renderDiagram();
+              fitToScreen();
+              updateSaveStatus(`Chargé depuis ${file.name}`, true);
+              showToast(`Fichier "${file.name}" chargé`);
+            } else {
+              showToast('Fichier JSON invalide', true);
+            }
+          } catch (err) {
+            showToast('Erreur lecture du fichier USB', true);
+          }
+        };
+        reader.readAsText(file);
+        e.target.value = '';
+      });
+
+      // Export Modal & Triggers
+      document.getElementById('exportPngBtn').addEventListener('click', () => openExportModal('png'));
+      document.getElementById('exportSvgBtn').addEventListener('click', () => openExportModal('svg'));
+      document.getElementById('exportCancelBtn').addEventListener('click', () => {
+        document.getElementById('exportModal').classList.remove('open');
+      });
+      document.getElementById('exportConfirmBtn').addEventListener('click', executeExportWithTitle);
+      document.getElementById('exportDiagramNameInput').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') executeExportWithTitle();
+      });
+
+      document.getElementById('zoomInBtn').addEventListener('click', () => setZoom(currentZoom + 0.1));
+      document.getElementById('zoomOutBtn').addEventListener('click', () => setZoom(currentZoom - 0.1));
+      document.getElementById('zoomFitBtn').addEventListener('click', fitToScreen);
+
+      // Render immediately on load
+      renderSidebar();
+      renderDiagram();
+      fitToScreen();
+    });
+  </script>
+</body>
+</html>
