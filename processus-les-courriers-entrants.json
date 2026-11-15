@@ -1,0 +1,118 @@
+{
+  "title": "PROCESSUS : LES COURRIERS ENTRANTS",
+  "subtitle": "Cabinet FIZAZI (Expertise Comptable & CAC) • Secrétariat & Contrôle Partner",
+  "config": {
+    "colSpacing": 320,
+    "rowSpacing": 56,
+    "autoBadge": true,
+    "showTitleOnCanvas": true
+  },
+  "actors": [
+    {
+      "id": "act_1",
+      "name": "Provenance / Émetteur",
+      "type": "box",
+      "highlight": false
+    },
+    {
+      "id": "act_2",
+      "name": "Secrétariat ",
+      "type": "box",
+      "highlight": true
+    },
+    {
+      "id": "act_3",
+      "name": "M. FIZAZI ",
+      "type": "box",
+      "highlight": true
+    },
+    {
+      "id": "act_4",
+      "name": "Services / Personnes Concernées",
+      "type": "box",
+      "highlight": false
+    }
+  ],
+  "items": [
+    {
+      "id": "stp_1",
+      "kind": "step",
+      "from": "act_1",
+      "to": "act_2",
+      "lineType": "solid",
+      "badge": "1",
+      "label": "1. Réception",
+      "observation": {
+        "enabled": true,
+        "title": "",
+        "detail": "Aucun accusé de réception n'est remis à l'émetteur (audit cloud),\nDifficulté de identifier le destinataire\nAbsence d'un dispositif de pointage des documents echangés",
+        "alertType": "Amélioration"
+      }
+    },
+    {
+      "id": "stp_2",
+      "kind": "step",
+      "from": "act_2",
+      "to": "act_2",
+      "lineType": "solid",
+      "badge": "2",
+      "label": "2. Traitement des documents",
+      "observation": null
+    },
+    {
+      "id": "stp_3",
+      "kind": "step",
+      "from": "act_2",
+      "to": "act_2",
+      "lineType": "solid",
+      "badge": "3",
+      "label": "3. Scanne",
+      "observation": {
+        "enabled": false,
+        "title": "Contrôle qualité & Résolution",
+        "detail": "Vérifier la lisibilité complète des pièces numérisées avant transmission électronique",
+        "alertType": "Amélioration"
+      }
+    },
+    {
+      "id": "stp_4",
+      "kind": "step",
+      "from": "act_2",
+      "to": "act_4",
+      "lineType": "solid",
+      "badge": "4",
+      "label": "4. Envoi par Email aux personnes concernées",
+      "observation": null
+    },
+    {
+      "id": "stp_5",
+      "kind": "step",
+      "from": "act_2",
+      "to": "act_3",
+      "lineType": "solid",
+      "badge": "5",
+      "label": "5. Informer M. FIZAZI",
+      "observation": {
+        "enabled": false,
+        "title": "Validation & Visa Partner",
+        "detail": "Revue préalable de conformité par M. FIZAZI avant classement ou distribution",
+        "alertType": "Risque"
+      }
+    },
+    {
+      "id": "stp_6",
+      "kind": "step",
+      "from": "act_3",
+      "to": "act_4",
+      "lineType": "solid",
+      "badge": "6",
+      "label": "6. Distribution ou dépôt au service concerné",
+      "observation": {
+        "enabled": true,
+        "title": "",
+        "detail": "Absence d'un dispositif de pointage des documents échangés",
+        "alertType": "Amélioration"
+      }
+    }
+  ]
+}
