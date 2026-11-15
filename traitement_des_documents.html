@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Processus : Traitement & Distribution des Documents</title>
+  <title>Processus : Les Courriers Entrants</title>
   <style>
     *, *::before, *::after {
       box-sizing: border-box;
@@ -551,7 +551,7 @@
         </svg>
         <span id="toggleSidebarLabel">Masquer l'éditeur</span>
       </button>
-      <input type="text" id="headerDiagramTitle" class="title-input-header" value="LOGIGRAMME D'ÉCHANGE — PROCESSUS : TRAITEMENT ET DISTRIBUTION DES DOCUMENTS" placeholder="Titre du logigramme..." title="Titre affiché en haut du diagramme" />
+      <input type="text" id="headerDiagramTitle" class="title-input-header" value="LOGIGRAMME D'ÉCHANGE — PROCESSUS : LES COURRIERS ENTRANTS" placeholder="Titre du logigramme..." title="Titre affiché en haut du diagramme" />
       <span id="saveStatusPill" class="save-status-pill" title="État de la sauvegarde">
         <span id="saveStatusDot" class="status-dot"></span>
         <span id="saveStatusText">Sauvegardé localement</span>
@@ -750,7 +750,7 @@
      */
         function getDefaultDiagramData() {
       return {
-        title: "LOGIGRAMME D'ÉCHANGE — PROCESSUS : TRAITEMENT ET DISTRIBUTION DES DOCUMENTS",
+        title: "LOGIGRAMME D'ÉCHANGE — PROCESSUS : LES COURRIERS ENTRANTS",
         subtitle: "Cabinet FIZAZI (Expertise Comptable & CAC) • Secrétariat & Contrôle Partner",
         config: {
           colSpacing: 320,
@@ -839,7 +839,7 @@
       };
     }
 
-    const STORAGE_KEY = 'uml_seq_traitement_documents_v1';
+    const STORAGE_KEY = 'uml_seq_courriers_entrants_v1';
     let state = loadState() || getDefaultDiagramData();
     let selectedItemId = null;
     let currentZoom = 1.0;
@@ -854,7 +854,7 @@
         if (!raw) return null;
         const parsed = JSON.parse(raw);
         if (parsed && Array.isArray(parsed.actors) && Array.isArray(parsed.items)) {
-          if (typeof parsed.title !== 'string') parsed.title = "LOGIGRAMME D'ÉCHANGE — PROCESSUS : TRAITEMENT ET DISTRIBUTION DES DOCUMENTS";
+          if (typeof parsed.title !== 'string') parsed.title = "LOGIGRAMME D'ÉCHANGE — PROCESSUS : LES COURRIERS ENTRANTS";
           if (typeof parsed.subtitle !== 'string') parsed.subtitle = "Cabinet FIZAZI • Secrétariat & Contrôle Partner";
           if (!parsed.config) parsed.config = { colSpacing: 320, rowSpacing: 56, autoBadge: true, showTitleOnCanvas: true };
           if (typeof parsed.config.showTitleOnCanvas !== 'boolean') parsed.config.showTitleOnCanvas = true;
@@ -1932,7 +1932,7 @@
           if (parsed && Array.isArray(parsed.actors) && Array.isArray(parsed.items)) {
             usbFileHandle = handle;
             state = parsed;
-            if (typeof state.title !== 'string') state.title = "LOGIGRAMME D'ÉCHANGE — PROCESSUS : TRAITEMENT ET DISTRIBUTION DES DOCUMENTS";
+            if (typeof state.title !== 'string') state.title = "LOGIGRAMME D'ÉCHANGE — PROCESSUS : LES COURRIERS ENTRANTS";
             if (typeof state.subtitle !== 'string') state.subtitle = "";
             selectedItemId = null;
             syncInputsFromState();
@@ -2269,7 +2269,7 @@
             const parsed = JSON.parse(ev.target.result);
             if (parsed && Array.isArray(parsed.actors) && Array.isArray(parsed.items)) {
               state = parsed;
-              if (typeof state.title !== 'string') state.title = "LOGIGRAMME D'ÉCHANGE — PROCESSUS : TRAITEMENT ET DISTRIBUTION DES DOCUMENTS";
+              if (typeof state.title !== 'string') state.title = "LOGIGRAMME D'ÉCHANGE — PROCESSUS : LES COURRIERS ENTRANTS";
               if (typeof state.subtitle !== 'string') state.subtitle = "";
               selectedItemId = null;
               syncInputsFromState();

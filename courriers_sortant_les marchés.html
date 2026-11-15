@@ -1274,9 +1274,7 @@
       });
 
       const lifelineEndY = Math.max(currentY + 24, 500);
-      const hasMatrix = activeObservations.length > 0;
-      const matrixHeight = hasMatrix ? (60 + activeObservations.length * 40 + 20) : 0;
-      const computedHeight = Math.max(lifelineEndY + 30 + matrixHeight, maxObsBottom + 30 + matrixHeight);
+      const computedHeight = Math.max(lifelineEndY + 36, maxObsBottom + 30);
 
       baseSvgWidth = computedWidth;
       baseSvgHeight = computedHeight;
@@ -1480,59 +1478,6 @@
 
         out += `</g>`;
       });
-
-      // Matrice de Synthèse des Risques & Pistes d'Amélioration du Processus
-      if (hasMatrix) {
-        const matrixStartY = lifelineEndY + 36;
-        const tableX = 36;
-        const tableW = Math.max(1060, baseSvgWidth - 72);
-        const tableStartY = matrixStartY + 28;
-
-        out += `
-          <g>
-            <circle cx="${tableX + 10}" cy="${matrixStartY + 10}" r="8" fill="#0284c7" />
-            <path d="M ${tableX + 6.5} ${matrixStartY + 8} L ${tableX + 9} ${matrixStartY + 12} L ${tableX + 14} ${matrixStartY + 6}" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-            <text x="${tableX + 26}" y="${matrixStartY + 15}" fill="#ffffff" font-size="14.5" font-weight="700">Matrice de Synthèse des Risques &amp; Pistes d'Amélioration du Processus</text>
-          </g>
-        `;
-
-        const totalRowsHeight = 32 + activeObservations.length * 38;
-        out += `<rect x="${tableX}" y="${tableStartY}" width="${tableW}" height="${totalRowsHeight}" rx="7" fill="#14171f" stroke="#262c3b" stroke-width="1" />`;
-
-        const col1W = 60;
-        const col2W = 320;
-        const col3W = 160;
-
-        out += `
-          <rect x="${tableX}" y="${tableStartY}" width="${tableW}" height="32" rx="7" fill="#1b212d" />
-          <line x1="${tableX}" y1="${tableStartY + 32}" x2="${tableX + tableW}" y2="${tableStartY + 32}" stroke="#262c3b" stroke-width="1" />
-          <text x="${tableX + 16}" y="${tableStartY + 21}" fill="#94a3b8" font-size="11" font-weight="600">Étape</text>
-          <text x="${tableX + col1W + 16}" y="${tableStartY + 21}" fill="#94a3b8" font-size="11" font-weight="600">Flux Concerné</text>
-          <text x="${tableX + col1W + col2W + 16}" y="${tableStartY + 21}" fill="#94a3b8" font-size="11" font-weight="600">Type d'Alerte</text>
-          <text x="${tableX + col1W + col2W + col3W + 16}" y="${tableStartY + 21}" fill="#94a3b8" font-size="11" font-weight="600">Risque ou Piste d'Amélioration Recommandée</text>
-        `;
-
-        activeObservations.forEach((obsEntry, idx) => {
-          const rowY = tableStartY + 32 + idx * 38;
-          const { stepItem, badgeNum } = obsEntry;
-          const obs = stepItem.observation;
-          const rowBg = idx % 2 === 0 ? 'rgba(255,255,255,0.015)' : 'rgba(255,255,255,0.035)';
-          const recText = (obs.title && obs.title.trim() ? (obs.title.trim() + ' : ') : '') + (obs.detail || '');
-
-          out += `
-            <rect x="${tableX}" y="${rowY}" width="${tableW}" height="${38}" fill="${rowBg}" />
-            ${idx < activeObservations.length - 1 ? `<line x1="${tableX}" y1="${rowY + 38}" x2="${tableX + tableW}" y2="${rowY + 38}" stroke="#222834" stroke-width="1" />` : ''}
-            <circle cx="${tableX + 28}" cy="${rowY + 19}" r="9.5" fill="#ffffff" />
-            <text x="${tableX + 28}" y="${rowY + 22.5}" text-anchor="middle" fill="#111827" font-size="10.5" font-weight="700">${escapeXml(badgeNum)}</text>
-            <text x="${tableX + col1W + 16}" y="${rowY + 23}" fill="#e2e8f0" font-size="11.5" font-weight="400">${escapeXml(truncateText(stepItem.label, 45))}</text>
-            <g transform="translate(${tableX + col1W + col2W + 16}, ${rowY + 11})">
-              <text x="0" y="12" font-size="12">💡</text>
-              <text x="18" y="12" fill="#f59e0b" font-size="11.5" font-weight="700">${escapeXml(obs.alertType || 'Amélioration')}</text>
-            </g>
-            <text x="${tableX + col1W + col2W + col3W + 16}" y="${rowY + 23}" fill="#cbd5e1" font-size="11.5" font-weight="400">${escapeXml(recText)}</text>
-          `;
-        });
-      }
 
       svg.innerHTML = out;
 
