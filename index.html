@@ -71,6 +71,43 @@
       text-overflow: ellipsis;
     }
 
+    /* Navigation Switcher between Diagrams */
+    .header-nav {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      background-color: #1a1a1d;
+      padding: 3px;
+      border-radius: 8px;
+      border: 1px solid #383940;
+    }
+
+    .nav-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 11px;
+      border-radius: 6px;
+      font-size: 11.5px;
+      font-weight: 500;
+      color: #9ca3af;
+      text-decoration: none;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+
+    .nav-link:hover {
+      color: #ffffff;
+      background-color: #27282f;
+    }
+
+    .nav-link.active {
+      color: #ffffff;
+      background-color: #2563eb;
+      font-weight: 600;
+      box-shadow: 0 1px 3px rgba(37, 99, 235, 0.4);
+    }
+
     .title-input-header {
       background-color: #1e1e1e;
       border: 1px solid #3f3f46;
@@ -538,6 +575,24 @@
         </svg>
         <span id="toggleSidebarLabel">Éditeur</span>
       </button>
+
+      <!-- Nav Switcher -->
+      <nav class="header-nav" title="Changer de diagramme">
+        <a href="index.html" class="nav-link active">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+          </svg>
+          <span>1. Plis AO</span>
+        </a>
+        <a href="visites.html" class="nav-link">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+          </svg>
+          <span>2. Accueil Visiteurs</span>
+        </a>
+      </nav>
       <input type="text" id="headerDiagramTitle" class="title-input-header" value="Processus d'Envoi & Décharge des Plis AO" placeholder="Titre du diagramme..." title="Titre affiché en haut du diagramme" />
       <span id="saveStatusPill" class="save-status-pill" title="État de la sauvegarde">
         <span id="saveStatusDot" class="status-dot"></span>

@@ -1,0 +1,2296 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Processus d'Accueil & Gestion des Visites - Diagramme de Séquence UML</title>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    html, body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background-color: #121316;
+      color: #e5e5e5;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #18181a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #37373f;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #52525b;
+    }
+
+    /* Top Header Toolbar */
+    .top-header {
+      height: 56px;
+      min-height: 56px;
+      background-color: #1a1b1e;
+      border-bottom: 1px solid #2d2e33;
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      z-index: 20;
+      flex-shrink: 0;
+    }
+
+    .header-left, .header-center, .header-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Navigation Switcher between Diagrams */
+    .header-nav {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      background-color: #121316;
+      padding: 3px;
+      border-radius: 8px;
+      border: 1px solid #2f3037;
+    }
+
+    .nav-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 11px;
+      border-radius: 6px;
+      font-size: 11.5px;
+      font-weight: 500;
+      color: #9ca3af;
+      text-decoration: none;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+
+    .nav-link:hover {
+      color: #ffffff;
+      background-color: #26272e;
+    }
+
+    .nav-link.active {
+      color: #ffffff;
+      background-color: #2563eb;
+      font-weight: 600;
+      box-shadow: 0 1px 3px rgba(37, 99, 235, 0.4);
+    }
+
+    .title-input-header {
+      background-color: #121316;
+      border: 1px solid #383940;
+      border-radius: 7px;
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 5px 10px;
+      width: 250px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .title-input-header:focus {
+      border-color: #3b82f6;
+    }
+
+    .save-status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: #a1a1aa;
+      background-color: #121316;
+      border: 1px solid #2f3037;
+      padding: 4px 9px;
+      border-radius: 9999px;
+      white-space: nowrap;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: #10b981;
+      flex-shrink: 0;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12.5px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid #3c3d45;
+      background-color: #2b2c32;
+      color: #e5e5e5;
+      transition: background-color 0.15s, border-color 0.15s;
+      white-space: nowrap;
+    }
+
+    .btn:hover:not(:disabled) {
+      background-color: #373840;
+      border-color: #4a4b54;
+    }
+
+    .btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background-color: #2563eb;
+      border-color: #3b82f6;
+      color: #ffffff;
+      font-weight: 600;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: #1d4ed8;
+    }
+
+    .btn-success {
+      background-color: #059669;
+      border-color: #10b981;
+      color: #ffffff;
+      font-weight: 600;
+    }
+
+    .btn-success:hover:not(:disabled) {
+      background-color: #047857;
+    }
+
+    .btn-danger {
+      background-color: rgba(127, 29, 29, 0.55);
+      border-color: rgba(185, 28, 28, 0.6);
+      color: #fca5a5;
+    }
+
+    .btn-danger:hover:not(:disabled) {
+      background-color: rgba(153, 27, 27, 0.8);
+    }
+
+    .btn-xs {
+      padding: 3px 7px;
+      font-size: 11px;
+      border-radius: 6px;
+    }
+
+    /* Zoom Control Pill */
+    .zoom-group {
+      display: flex;
+      align-items: center;
+      background-color: #121316;
+      border: 1px solid #2f3037;
+      border-radius: 8px;
+      padding: 2px;
+      gap: 2px;
+    }
+
+    .zoom-btn {
+      background: transparent;
+      border: none;
+      color: #d4d4d4;
+      padding: 4px 9px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12.5px;
+      font-weight: 600;
+    }
+
+    .zoom-btn:hover {
+      background-color: #2b2c32;
+      color: #ffffff;
+    }
+
+    .zoom-label {
+      font-size: 12px;
+      font-family: monospace;
+      color: #d4d4d4;
+      min-width: 48px;
+      text-align: center;
+    }
+
+    /* Main Workspace Flex Container */
+    .main-workspace {
+      display: flex;
+      flex: 1;
+      width: 100vw;
+      height: calc(100vh - 56px);
+      min-height: 0;
+      min-width: 0;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Collapsible Left Editor Sidebar */
+    .editor-sidebar {
+      width: 350px;
+      min-width: 350px;
+      max-width: 350px;
+      flex-shrink: 0;
+      height: 100%;
+      background-color: #1a1b1e;
+      border-right: 1px solid #2d2e33;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      z-index: 15;
+    }
+
+    .editor-sidebar.collapsed {
+      display: none;
+    }
+
+    /* Sidebar Tabs */
+    .sidebar-tabs {
+      display: flex;
+      background-color: #141518;
+      border-bottom: 1px solid #2d2e33;
+      padding: 8px 6px 0 6px;
+      gap: 3px;
+      flex-shrink: 0;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 7px 5px;
+      border-radius: 7px 7px 0 0;
+      font-size: 11px;
+      font-weight: 500;
+      background: transparent;
+      color: #9ca3af;
+      border: 1px solid transparent;
+      border-bottom: none;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+      text-align: center;
+    }
+
+    .tab-btn:hover {
+      color: #e5e5e5;
+    }
+
+    .tab-btn.active {
+      background-color: #1a1b1e;
+      color: #ffffff;
+      font-weight: 600;
+      border-color: #2d2e33;
+    }
+
+    .tab-pane {
+      display: none;
+      flex: 1;
+      flex-direction: column;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .tab-pane.active {
+      display: flex;
+    }
+
+    .pane-toolbar {
+      padding: 10px 12px;
+      background-color: #212226;
+      border-bottom: 1px solid #2d2e33;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      flex-wrap: wrap;
+      flex-shrink: 0;
+    }
+
+    .pane-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* Editor Cards */
+    .card {
+      background-color: #24252a;
+      border: 1px solid #35363d;
+      border-radius: 9px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .card.selected {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.45);
+    }
+
+    .card.alt-card {
+      background-color: rgba(120, 53, 15, 0.2);
+      border-color: rgba(217, 119, 6, 0.45);
+    }
+
+    .card.obs-card {
+      background-color: rgba(14, 55, 115, 0.2);
+      border-color: rgba(2, 132, 199, 0.45);
+    }
+
+    .card.indented {
+      margin-left: 10px;
+      border-left: 3px solid rgba(245, 158, 11, 0.55);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .card-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .form-input, .form-select {
+      width: 100%;
+      background-color: #151619;
+      border: 1px solid #3c3d44;
+      border-radius: 7px;
+      padding: 6px 8px;
+      font-size: 12px;
+      color: #f3f4f6;
+      outline: none;
+    }
+
+    .form-input:focus, .form-select:focus {
+      border-color: #3b82f6;
+    }
+
+    .route-row {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .badge-pill {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background-color: #ffffff;
+      color: #111827;
+      font-size: 11px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* Diagram Viewport */
+    .diagram-viewport {
+      flex: 1;
+      min-width: 0;
+      min-height: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      display: flex;
+      justify-content: flex-start;
+      align-items: flex-start;
+      padding: 28px;
+      background-color: #101114;
+      position: relative;
+    }
+
+    .svg-stage {
+      display: inline-block;
+      flex-shrink: 0;
+      background-color: #101114;
+      border: 1px solid #23252a;
+      border-radius: 10px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65);
+    }
+
+    #sequenceSvg {
+      display: block;
+      background-color: #101114;
+    }
+
+    .svg-interactive {
+      cursor: pointer;
+    }
+    .svg-interactive:hover .hover-highlight {
+      opacity: 1;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #24252a;
+      border: 1px solid #454752;
+      color: #ffffff;
+      padding: 9px 18px;
+      border-radius: 10px;
+      font-size: 12.5px;
+      font-weight: 500;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toast.visible {
+      opacity: 1;
+    }
+
+    /* Modal Backdrop */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(0, 0, 0, 0.75);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 16px;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-box {
+      background-color: #1d1e22;
+      border: 1px solid #383a42;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 440px;
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.7);
+    }
+
+    .usb-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11.5px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      background-color: rgba(37, 99, 235, 0.14);
+      border: 1px solid rgba(59, 130, 246, 0.35);
+      color: #93c5fd;
+    }
+
+    .usb-badge.connected {
+      background-color: rgba(5, 150, 105, 0.16);
+      border-color: rgba(16, 185, 129, 0.4);
+      color: #6ee7b7;
+    }
+
+    @media (max-width: 900px) {
+      .save-status-pill {
+        display: none;
+      }
+      .title-input-header {
+        width: 180px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation & Action Toolbar -->
+  <header class="top-header">
+    <div class="header-left">
+      <button id="toggleSidebarBtn" class="btn" title="Masquer/Afficher l'éditeur">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h10"/>
+        </svg>
+        <span id="toggleSidebarLabel">Éditeur</span>
+      </button>
+
+      <!-- Nav Switcher -->
+      <nav class="header-nav" title="Changer de diagramme">
+        <a href="index.html" class="nav-link">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+          </svg>
+          <span>1. Plis AO</span>
+        </a>
+        <a href="visites.html" class="nav-link active">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+          </svg>
+          <span>2. Accueil Visiteurs</span>
+        </a>
+      </nav>
+
+      <input type="text" id="headerDiagramTitle" class="title-input-header" value="Processus d'Accueil et Gestion des Visites" placeholder="Titre du diagramme..." title="Titre du diagramme" />
+      <span id="saveStatusPill" class="save-status-pill" title="État de la sauvegarde">
+        <span id="saveStatusDot" class="status-dot"></span>
+        <span id="saveStatusText">Sauvegardé</span>
+      </span>
+    </div>
+
+    <div class="header-center">
+      <div class="zoom-group">
+        <button id="zoomOutBtn" class="zoom-btn" title="Zoom arrière">−</button>
+        <span id="zoomLabel" class="zoom-label">100%</span>
+        <button id="zoomInBtn" class="zoom-btn" title="Zoom avant">+</button>
+        <button id="zoomFitBtn" class="zoom-btn" title="Ajuster à l'écran">Ajuster</button>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <button id="quickUsbSaveBtn" class="btn" title="Sauvegarder en JSON pour clé USB">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+          <polyline points="17 21 17 13 7 13 7 21"/>
+        </svg>
+        <span>Clé USB</span>
+      </button>
+      <button id="exportSvgBtn" class="btn" title="Télécharger en format vectoriel SVG">
+        <span>SVG</span>
+      </button>
+      <button id="exportPngBtn" class="btn btn-success" title="Télécharger en Image Haute Définition PNG">
+        <span>Exporter Image</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <div class="main-workspace">
+
+    <!-- Collapsible Left Editor Sidebar -->
+    <aside id="editorSidebar" class="editor-sidebar">
+      <div class="sidebar-tabs">
+        <button class="tab-btn active" data-tab="steps">Étapes (<span id="stepCountBadge">11</span>)</button>
+        <button class="tab-btn" data-tab="actors">Acteurs (<span id="actorCountBadge">4</span>)</button>
+        <button class="tab-btn" data-tab="alt">Blocs [alt]</button>
+        <button class="tab-btn" data-tab="obs">Observations (<span id="obsCountBadge">3</span>)</button>
+        <button class="tab-btn" data-tab="usb">Options</button>
+      </div>
+
+      <!-- Tab 1: Steps -->
+      <div id="tab-steps" class="tab-pane active">
+        <div class="pane-toolbar">
+          <button id="addStepBtn" class="btn btn-primary btn-xs">+ Étape</button>
+          <button id="addAltBtn" class="btn btn-xs" style="color:#fcd34d;border-color:#92400e;">+ Bloc [alt]</button>
+          <label style="display:flex;align-items:center;gap:4px;font-size:11px;color:#d4d4d4;cursor:pointer;">
+            <input type="checkbox" id="autoBadgeToggle" checked />
+            <span>Auto N°</span>
+          </label>
+        </div>
+        <div id="stepsListContainer" class="pane-scroll"></div>
+      </div>
+
+      <!-- Tab 2: Actors -->
+      <div id="tab-actors" class="tab-pane">
+        <div class="pane-toolbar">
+          <span style="font-size:11.5px;color:#a3a3a3;">Acteurs (Gauche → Droite)</span>
+          <button id="addActorBtn" class="btn btn-primary btn-xs">+ Acteur</button>
+        </div>
+        <div id="actorsListContainer" class="pane-scroll"></div>
+      </div>
+
+      <!-- Tab 3: Alt Blocks -->
+      <div id="tab-alt" class="tab-pane">
+        <div class="pane-toolbar">
+          <span style="font-size:11.5px;color:#fcd34d;font-weight:600;">Conditions Alternatives [alt]</span>
+          <button id="addAltTabBtn" class="btn btn-xs" style="color:#fcd34d;border-color:#92400e;">+ Nouveau [alt]</button>
+        </div>
+        <div id="altBlocksContainer" class="pane-scroll"></div>
+      </div>
+
+      <!-- Tab 4: Observations & Risk Matrix -->
+      <div id="tab-obs" class="tab-pane">
+        <div class="pane-toolbar">
+          <span style="font-size:11.5px;color:#38bdf8;font-weight:600;">Observations & Matrice</span>
+          <button id="addObsBtn" class="btn btn-primary btn-xs">+ Observation</button>
+        </div>
+        <div class="pane-scroll">
+          <div class="card" style="margin-bottom:6px;">
+            <label style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:#e5e5e5;cursor:pointer;">
+              <input type="checkbox" id="showObservationsToggle" checked />
+              <span>Afficher les cartes d'observations à droite</span>
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:#e5e5e5;cursor:pointer;">
+              <input type="checkbox" id="showMatrixToggle" checked />
+              <span>Afficher la matrice de synthèse en bas</span>
+            </label>
+          </div>
+          <div id="observationsContainer" style="display:flex;flex-direction:column;gap:10px;"></div>
+        </div>
+      </div>
+
+      <!-- Tab 5: USB & Options -->
+      <div id="tab-usb" class="tab-pane">
+        <div class="pane-scroll">
+          <div class="card">
+            <div style="font-size:12.5px;font-weight:600;color:#fff;">Stockage Clé USB / Portable</div>
+            <p style="font-size:11.5px;color:#a3a3a3;line-height:1.45;">
+              Enregistrez le fichier sur clé USB pour modifier ce diagramme sur n'importe quel poste de travail.
+            </p>
+            <div id="usbLinkStatus" class="usb-badge">
+              <span>Mode portable prêt (export / import .json)</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <button id="usbSaveDirectBtn" class="btn btn-primary btn-xs" style="width:100%;padding:7px;">Sauvegarder en JSON</button>
+              <button id="usbOpenDirectBtn" class="btn btn-xs" style="width:100%;padding:7px;">Ouvrir un JSON</button>
+              <input type="file" id="uploadJsonInput" accept=".json" style="display:none;" />
+            </div>
+          </div>
+
+          <div class="card">
+            <div style="font-size:12.5px;font-weight:600;color:#fff;">Espacements & Affichage</div>
+            <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#e5e5e5;cursor:pointer;">
+              <input type="checkbox" id="showTitleOnCanvasToggle" checked />
+              <span>Afficher le titre en haut</span>
+            </label>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:11px;color:#a3a3a3;margin-bottom:4px;">
+                <span>Espacement horizontal acteurs</span>
+                <span id="colSpacingVal" style="color:#60a5fa;font-family:monospace;">210 px</span>
+              </div>
+              <input type="range" id="colSpacingRange" min="160" max="340" step="5" value="210" style="width:100%;" />
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:11px;color:#a3a3a3;margin-bottom:4px;">
+                <span>Espacement vertical étapes</span>
+                <span id="rowSpacingVal" style="color:#60a5fa;font-family:monospace;">52 px</span>
+              </div>
+              <input type="range" id="rowSpacingRange" min="40" max="75" step="2" value="52" style="width:100%;" />
+            </div>
+          </div>
+
+          <div class="card">
+            <div style="font-size:12.5px;font-weight:600;color:#fff;">Réinitialisation</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+              <button id="resetOriginalBtn" class="btn btn-xs">Modèle par défaut</button>
+              <button id="clearAllBtn" class="btn btn-danger btn-xs">Vider tout</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Scrollable Diagram Canvas Viewport -->
+    <main id="diagramViewport" class="diagram-viewport">
+      <div id="svgStage" class="svg-stage">
+        <svg id="sequenceSvg" xmlns="http://www.w3.org/2000/svg" width="1240" height="1260" viewBox="0 0 1240 1260"></svg>
+      </div>
+    </main>
+
+  </div>
+
+  <!-- Toast Banner -->
+  <div id="toastBanner" class="toast">
+    <span id="toastDot" style="width:8px;height:8px;border-radius:50%;background:#10b981;"></span>
+    <span id="toastText">Action effectuée</span>
+  </div>
+
+  <!-- Confirmation Modal -->
+  <div id="confirmModal" class="modal-backdrop">
+    <div class="modal-box">
+      <h3 id="confirmTitle" style="font-size:15px;font-weight:600;color:#fff;">Confirmation</h3>
+      <p id="confirmMessage" style="font-size:13px;color:#d4d4d4;line-height:1.45;"></p>
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:4px;">
+        <button id="confirmCancelBtn" class="btn">Annuler</button>
+        <button id="confirmOkBtn" class="btn btn-primary">Confirmer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Export Modal -->
+  <div id="exportModal" class="modal-backdrop">
+    <div class="modal-box">
+      <h3 id="exportModalTitle" style="font-size:15.5px;font-weight:600;color:#fff;">Exporter le diagramme</h3>
+      <p style="font-size:12.5px;color:#a3a3a3;line-height:1.45;">
+        Le titre saisi ci-dessous figurera en haut du document exporté et servira de nom de fichier.
+      </p>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <label for="exportDiagramNameInput" style="font-size:11.5px;font-weight:600;color:#d4d4d4;">Titre du diagramme :</label>
+        <input type="text" id="exportDiagramNameInput" class="form-input" style="font-size:13px;padding:8px 10px;" />
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <label for="exportSubtitleInput" style="font-size:11.5px;font-weight:600;color:#d4d4d4;">Sous-titre (optionnel) :</label>
+        <input type="text" id="exportSubtitleInput" class="form-input" style="font-size:12px;padding:7px 10px;" placeholder="Ex: Matrice des flux et pistes d'amélioration" />
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:6px;">
+        <button id="exportCancelBtn" class="btn">Annuler</button>
+        <button id="exportConfirmBtn" class="btn btn-success">Télécharger</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * Modèle exact d'après l'image de l'utilisateur :
+     * Processus d'Accueil & Gestion des Visites
+     * - 4 acteurs (Client, Secrétariat Fatima, Manager / M. FIZAZI, Salle de Réunion)
+     * - 11 étapes numérotées de 1 à 11
+     * - Blocs conditionnels [alt] avec sous-bloc imbriqué
+     * - Cartes d'observations bleues à droite
+     * - Matrice de Synthèse des Risques & Pistes d'Amélioration du Processus
+     */
+    function getDefaultDiagramData() {
+      return {
+        title: "Processus d'Accueil et Gestion des Visites",
+        subtitle: "Matrice des flux et pistes d'amélioration du cabinet",
+        config: {
+          colSpacing: 215,
+          rowSpacing: 52,
+          autoBadge: true,
+          showTitleOnCanvas: true,
+          showObservations: true,
+          showMatrix: true
+        },
+        actors: [
+          { id: 'act_client', name: 'Client / Visiteur Externe', type: 'actor' },
+          { id: 'act_fatima', name: 'Secrétariat (Fatima)', type: 'participant' },
+          { id: 'act_manager', name: 'Manager / Partner / M. FIZAZI', type: 'participant' },
+          { id: 'act_salle', name: 'Salle de Réunion', type: 'participant' }
+        ],
+        items: [
+          {
+            id: 'stp_1',
+            kind: 'step',
+            from: 'act_client',
+            to: 'act_fatima',
+            lineType: 'solid',
+            badge: '1',
+            label: "1. Arrivée physique à l'accueil du cabinet"
+          },
+          {
+            id: 'stp_2',
+            kind: 'step',
+            from: 'act_fatima',
+            to: 'act_fatima',
+            lineType: 'solid',
+            badge: '2',
+            label: "2. Accueil & Vérification de l'existence d'un RDV"
+          },
+          {
+            id: 'alt_sans_rdv',
+            kind: 'alt_start',
+            tag: 'alt',
+            condition: 'Visite sans rendez-vous préalable'
+          },
+          {
+            id: 'stp_3',
+            kind: 'step',
+            from: 'act_fatima',
+            to: 'act_fatima',
+            lineType: 'solid',
+            badge: '3',
+            label: '3a. Rappel de la règle : visites sans RDV non autorisées'
+          },
+          {
+            id: 'stp_4',
+            kind: 'step',
+            from: 'act_fatima',
+            to: 'act_manager',
+            lineType: 'solid',
+            badge: '4',
+            label: '4a. Informer la personne concerné / disponibilité'
+          },
+          {
+            id: 'alt_manager_refuse',
+            kind: 'alt_start',
+            tag: 'alt',
+            condition: 'Manager / Fizazi refuse'
+          },
+          {
+            id: 'stp_5',
+            kind: 'step',
+            from: 'act_manager',
+            to: 'act_fatima',
+            lineType: 'dashed',
+            badge: '5',
+            label: '5a. Refus de recevoir le visiteur'
+          },
+          {
+            id: 'stp_6',
+            kind: 'step',
+            from: 'act_fatima',
+            to: 'act_client',
+            lineType: 'dashed',
+            badge: '6',
+            label: '6a. Prise de rendez-vous ultérieur'
+          },
+          {
+            id: 'alt_manager_accepte',
+            kind: 'alt_else',
+            condition: 'Manager / Fizazi accepte à titre exceptionnel'
+          },
+          {
+            id: 'stp_7',
+            kind: 'step',
+            from: 'act_manager',
+            to: 'act_fatima',
+            lineType: 'dashed',
+            badge: '7',
+            label: '5b. Accord pour réceptionner le visiteur'
+          },
+          {
+            id: 'alt_manager_end',
+            kind: 'alt_end'
+          },
+          {
+            id: 'alt_sans_rdv_end',
+            kind: 'alt_end'
+          },
+          {
+            id: 'alt_avec_rdv',
+            kind: 'alt_start',
+            tag: 'alt',
+            condition: 'Visite avec rendez-vous confirmé'
+          },
+          {
+            id: 'stp_8',
+            kind: 'step',
+            from: 'act_fatima',
+            to: 'act_manager',
+            lineType: 'solid',
+            badge: '8',
+            label: "3b. Signalement de l'arrivée du client"
+          },
+          {
+            id: 'stp_9',
+            kind: 'step',
+            from: 'act_fatima',
+            to: 'act_salle',
+            lineType: 'solid',
+            badge: '9',
+            label: '4b. Vérification de la mise en place de la salle de réunion'
+          },
+          {
+            id: 'stp_10',
+            kind: 'step',
+            from: 'act_client',
+            to: 'act_salle',
+            lineType: 'solid',
+            badge: '10',
+            label: "5c. Installation du client en salle de réunion avec boissons d'accueil"
+          },
+          {
+            id: 'stp_11',
+            kind: 'step',
+            from: 'act_manager',
+            to: 'act_salle',
+            lineType: 'solid',
+            badge: '11',
+            label: '6c. Entrée du Manager / Partner pour la réunion'
+          },
+          {
+            id: 'alt_avec_rdv_end',
+            kind: 'alt_end'
+          }
+        ],
+        observations: [
+          {
+            id: 'obs_1',
+            stepId: 'stp_2',
+            title: 'OBSERVATION:',
+            text: "Absence d'un moyen de prise des RDV",
+            alertType: 'Amélioration',
+            recommendation: ": Absence d'un moyen de prise des RDV"
+          },
+          {
+            id: 'obs_2',
+            stepId: 'stp_4',
+            title: 'OBSERVATION:',
+            text: 'visite sans RDV',
+            alertType: 'Amélioration',
+            recommendation: ': visite sans RDV'
+          },
+          {
+            id: 'obs_3',
+            stepId: 'stp_9',
+            title: 'OBSERVATION: Salle non prête ou occupée',
+            text: 'Absence moyen gestion de la salle des réunions',
+            alertType: 'Amélioration',
+            recommendation: 'Salle non prête ou occupée : Absence moyen gestion de la salle des réunions'
+          }
+        ]
+      };
+    }
+
+    const STORAGE_KEY = 'uml_seq_visites_v1';
+    let state = loadState() || getDefaultDiagramData();
+    let selectedItemId = null;
+    let currentZoom = 1.0;
+    let baseSvgWidth = 1200;
+    let baseSvgHeight = 1260;
+    let sidebarVisible = true;
+    let usbFileHandle = null;
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        if (parsed && Array.isArray(parsed.actors) && Array.isArray(parsed.items)) {
+          if (!parsed.observations) parsed.observations = [];
+          if (!parsed.config) parsed.config = { colSpacing: 215, rowSpacing: 52, autoBadge: true, showTitleOnCanvas: true, showObservations: true, showMatrix: true };
+          return parsed;
+        }
+      } catch (e) {}
+      return null;
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        const timeStr = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        updateSaveStatus(`Sauvegardé (${timeStr})`, false);
+      } catch (e) {}
+    }
+
+    function updateSaveStatus(text, isUsb = false) {
+      const dot = document.getElementById('saveStatusDot');
+      const label = document.getElementById('saveStatusText');
+      if (dot && label) {
+        dot.style.backgroundColor = isUsb ? '#3b82f6' : '#10b981';
+        label.textContent = text;
+      }
+    }
+
+    function uid(prefix = 'id') {
+      return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`;
+    }
+
+    function slugifyFilename(str) {
+      const clean = String(str || 'diagramme-visites')
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-zA-Z0-9_-]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .toLowerCase();
+      return clean || 'diagramme-visites';
+    }
+
+    function escapeXml(str) {
+      return String(str ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;');
+    }
+
+    function escapeHtml(str) {
+      return String(str ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function showToast(msg, isError = false) {
+      const toast = document.getElementById('toastBanner');
+      document.getElementById('toastText').textContent = msg;
+      document.getElementById('toastDot').style.backgroundColor = isError ? '#ef4444' : '#10b981';
+      toast.classList.add('visible');
+      clearTimeout(toast._timer);
+      toast._timer = setTimeout(() => toast.classList.remove('visible'), 2500);
+    }
+
+    function openConfirm(title, message, onConfirm) {
+      const modal = document.getElementById('confirmModal');
+      document.getElementById('confirmTitle').textContent = title;
+      document.getElementById('confirmMessage').textContent = message;
+      modal.classList.add('open');
+
+      const close = () => modal.classList.remove('open');
+      document.getElementById('confirmCancelBtn').onclick = close;
+      document.getElementById('confirmOkBtn').onclick = () => {
+        close();
+        onConfirm();
+      };
+    }
+
+    /**
+     * Rendu SVG Principal (Diagramme + Observations + Matrice des Risques)
+     */
+    function renderDiagram(options = {}) {
+      const forceTitle = Boolean(options.forceTitle);
+      const customTitle = options.customTitle !== undefined ? options.customTitle : state.title;
+      const customSubtitle = options.customSubtitle !== undefined ? options.customSubtitle : state.subtitle;
+
+      const svg = document.getElementById('sequenceSvg');
+      const actors = state.actors;
+      const items = state.items;
+      const observations = state.observations || [];
+      const colSpacing = Number(state.config.colSpacing) || 215;
+      const rowSpacing = Number(state.config.rowSpacing) || 52;
+
+      const hasTitleText = String(customTitle || '').trim().length > 0;
+      const displayTitleBlock = hasTitleText && (forceTitle || state.config.showTitleOnCanvas);
+      const hasSubtitleText = displayTitleBlock && String(customSubtitle || '').trim().length > 0;
+
+      const titleAreaHeight = displayTitleBlock ? (hasSubtitleText ? 68 : 52) : 0;
+      const leftMargin = 120;
+      const topHeaderY = 26 + titleAreaHeight;
+      const lifelineStartY = topHeaderY + 68;
+
+      const actorXMap = {};
+      actors.forEach((act, idx) => {
+        actorXMap[act.id] = leftMargin + idx * colSpacing;
+      });
+
+      const lastActorX = actors.length > 0 ? actorXMap[actors[actors.length - 1].id] : 800;
+      const obsColumnX = lastActorX + 95;
+      const obsCardWidth = 245;
+
+      const computedWidth = Math.max(
+        1160,
+        state.config.showObservations !== false && observations.length > 0
+          ? obsColumnX + obsCardWidth + 40
+          : lastActorX + 160
+      );
+
+      let currentY = lifelineStartY + 36;
+      const layoutEntries = [];
+      const altStack = [];
+      let badgeCounter = 1;
+      const stepCoordsMap = {}; // ID -> { y, fromX, toX, isSelf, dir, badgeNum, label }
+
+      items.forEach((item) => {
+        if (item.kind === 'alt_start') {
+          currentY += 16;
+          const depth = altStack.length;
+          const blk = {
+            startItem: item,
+            startY: currentY,
+            elseSections: [],
+            endY: currentY + 60,
+            depth,
+            minX: Infinity,
+            maxX: -Infinity
+          };
+          altStack.push(blk);
+          layoutEntries.push({ type: 'alt_block', block: blk });
+          currentY += 36;
+        } else if (item.kind === 'alt_else') {
+          currentY += 10;
+          if (altStack.length > 0) {
+            altStack[altStack.length - 1].elseSections.push({ item, y: currentY });
+          }
+          currentY += 32;
+        } else if (item.kind === 'alt_end') {
+          currentY += 14;
+          if (altStack.length > 0) {
+            altStack.pop().endY = currentY;
+          }
+          currentY += 24;
+        } else if (item.kind === 'step') {
+          const fromIdx = actors.findIndex(a => a.id === item.from);
+          const toIdx = actors.findIndex(a => a.id === item.to);
+          const isValid = fromIdx !== -1 && toIdx !== -1;
+          const isSelf = isValid && item.from === item.to;
+          const badgeNum = state.config.autoBadge ? String(badgeCounter++) : (item.badge || String(badgeCounter++));
+
+          if (isValid) {
+            const x1 = actorXMap[item.from];
+            const x2 = actorXMap[item.to];
+            const spanMin = Math.min(x1, x2);
+            const spanMax = isSelf ? x1 + 180 : Math.max(x1, x2);
+            altStack.forEach(blk => {
+              blk.minX = Math.min(blk.minX, spanMin);
+              blk.maxX = Math.max(blk.maxX, spanMax);
+            });
+            stepCoordsMap[item.id] = { y: currentY, fromX: x1, toX: x2, isSelf, badgeNum, label: item.label };
+          }
+
+          layoutEntries.push({
+            type: 'step',
+            item,
+            y: currentY,
+            isValid,
+            isSelf,
+            badgeNum
+          });
+
+          currentY += isSelf ? Math.max(rowSpacing + 8, 58) : rowSpacing;
+        }
+      });
+
+      while (altStack.length > 0) {
+        altStack.pop().endY = currentY + 12;
+        currentY += 26;
+      }
+
+      const lifelineEndY = Math.max(currentY + 20, 520);
+      let matrixStartY = lifelineEndY + 36;
+      let totalSvgHeight = lifelineEndY + 40;
+
+      // Matrice de synthèse
+      const hasMatrix = state.config.showMatrix !== false && observations.length > 0;
+      if (hasMatrix) {
+        const matrixRowsCount = observations.length;
+        const matrixHeight = 52 + matrixRowsCount * 40;
+        totalSvgHeight = matrixStartY + matrixHeight + 35;
+      }
+
+      baseSvgWidth = computedWidth;
+      baseSvgHeight = totalSvgHeight;
+
+      svg.setAttribute('viewBox', `0 0 ${baseSvgWidth} ${baseSvgHeight}`);
+      applyZoom();
+
+      let out = `
+        <defs>
+          <style>
+            text { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+          </style>
+          <marker id="arrow-solid" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+            <path d="M 0 1.2 L 9.5 5 L 0 8.8 z" fill="#cfcfcf" />
+          </marker>
+          <marker id="arrow-solid-sel" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 1.2 L 9.5 5 L 0 8.8 z" fill="#60a5fa" />
+          </marker>
+          <marker id="arrow-dashed" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+            <path d="M 0 1.5 L 9 5 L 0 8.5" fill="none" stroke="#cfcfcf" stroke-width="1.4" />
+          </marker>
+          <marker id="arrow-dashed-sel" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 1.5 L 9 5 L 0 8.5" fill="none" stroke="#60a5fa" stroke-width="1.6" />
+          </marker>
+        </defs>
+        <rect x="0" y="0" width="${baseSvgWidth}" height="${baseSvgHeight}" fill="#101114" />
+      `;
+
+      // Titre en haut
+      if (displayTitleBlock) {
+        const centerX = (lastActorX + leftMargin) / 2;
+        out += `<text x="${centerX}" y="34" text-anchor="middle" fill="#ffffff" font-size="18" font-weight="700" letter-spacing="0.3">${escapeXml(customTitle)}</text>`;
+        if (hasSubtitleText) {
+          out += `<text x="${centerX}" y="54" text-anchor="middle" fill="#9ca3af" font-size="12" font-weight="400">${escapeXml(customSubtitle)}</text>`;
+        }
+        out += `<line x1="36" y1="${titleAreaHeight + 8}" x2="${baseSvgWidth - 36}" y2="${titleAreaHeight + 8}" stroke="#26272e" stroke-width="1" />`;
+      }
+
+      // Lignes de vie verticales
+      actors.forEach((act) => {
+        const x = actorXMap[act.id];
+        out += `<line x1="${x}" y1="${lifelineStartY}" x2="${x}" y2="${lifelineEndY}" stroke="#4b4d57" stroke-width="1.2" stroke-dasharray="5,5" />`;
+      });
+
+      // En-têtes des acteurs
+      actors.forEach((act) => {
+        const x = actorXMap[act.id];
+        const isSel = selectedItemId === act.id;
+        const label = escapeXml(act.name);
+        const boxW = Math.max(130, act.name.length * 7.4 + 24);
+        const boxH = 38;
+        const boxX = x - boxW / 2;
+        const boxY = topHeaderY + 14;
+
+        out += `<g class="svg-interactive" data-select-id="${act.id}" data-select-type="actor">`;
+
+        if (act.type === 'actor') {
+          // Acteur avec icône personnage au-dessus de la boîte (comme sur l'image Client / Visiteur Externe)
+          const iconCy = topHeaderY;
+          out += `
+            <circle cx="${x}" cy="${iconCy}" r="11" fill="#1e2025" stroke="${isSel ? '#60a5fa' : '#6b7280'}" stroke-width="${isSel ? '2' : '1.2'}" />
+            <circle cx="${x}" cy="${iconCy - 3}" r="3.4" fill="none" stroke="${isSel ? '#93c5fd' : '#d1d5db'}" stroke-width="1.2" />
+            <path d="M ${x - 5.5} ${iconCy + 6.5} C ${x - 5.5} ${iconCy + 2}, ${x + 5.5} ${iconCy + 2}, ${x + 5.5} ${iconCy + 6.5}"
+              fill="none" stroke="${isSel ? '#93c5fd' : '#d1d5db'}" stroke-width="1.2" stroke-linecap="round" />
+            <rect x="${boxX}" y="${boxY}" width="${boxW}" height="${boxH}" rx="7"
+              fill="#1e2025" stroke="${isSel ? '#60a5fa' : '#4b4d57'}" stroke-width="${isSel ? '2' : '1.3'}" />
+            <text x="${x}" y="${boxY + 23}" text-anchor="middle" fill="${isSel ? '#93c5fd' : '#ffffff'}" font-size="12" font-weight="600">${label}</text>
+          `;
+        } else {
+          // Boîte rectangulaire avec coins arrondis
+          out += `
+            <rect x="${boxX}" y="${boxY}" width="${boxW}" height="${boxH}" rx="7"
+              fill="#1e2025" stroke="${isSel ? '#60a5fa' : '#4b4d57'}" stroke-width="${isSel ? '2' : '1.3'}" />
+            <text x="${x}" y="${boxY + 23}" text-anchor="middle" fill="${isSel ? '#93c5fd' : '#ffffff'}" font-size="12" font-weight="600">${label}</text>
+          `;
+        }
+        out += `</g>`;
+      });
+
+      // Cadres conditionnels [alt] / [else]
+      layoutEntries.forEach((entry) => {
+        if (entry.type !== 'alt_block') return;
+        const blk = entry.block;
+        const validMin = blk.minX !== Infinity ? blk.minX : leftMargin;
+        const validMax = blk.maxX !== -Infinity ? blk.maxX : lastActorX;
+
+        // Décalage pour blocs imbriqués
+        const indent = blk.depth * 14;
+        const boxLeft = Math.max(20, validMin - 38 + indent);
+        const boxRight = Math.min(lastActorX + 48 - indent, validMax + 38);
+        const boxW = Math.max(220, boxRight - boxLeft);
+        const boxH = Math.max(54, blk.endY - blk.startY);
+
+        const isStartSel = selectedItemId === blk.startItem.id;
+        const fullTag = `${blk.startItem.tag || 'alt'} [${blk.startItem.condition || ''}]`;
+        const tabW = Math.min(boxW - 10, Math.max(120, fullTag.length * 6.8 + 24));
+        const tabH = 22;
+
+        out += `<g class="svg-interactive" data-select-id="${blk.startItem.id}" data-select-type="step">`;
+        out += `<rect x="${boxLeft}" y="${blk.startY}" width="${boxW}" height="${boxH}" fill="rgba(255,255,255,0.015)" stroke="${isStartSel ? '#60a5fa' : '#3c3f49'}" stroke-width="${isStartSel ? '1.8' : '1.2'}" rx="3" />`;
+        out += `<path d="M ${boxLeft} ${blk.startY} L ${boxLeft + tabW} ${blk.startY} L ${boxLeft + tabW} ${blk.startY + tabH - 6} L ${boxLeft + tabW - 6} ${blk.startY + tabH} L ${boxLeft} ${blk.startY + tabH} Z" fill="#202228" stroke="${isStartSel ? '#60a5fa' : '#3c3f49'}" stroke-width="1.1" />`;
+        out += `<text x="${boxLeft + 9}" y="${blk.startY + 15}" fill="#f3f4f6" font-size="11.5" font-weight="600">${escapeXml(fullTag)}</text>`;
+        out += `</g>`;
+
+        blk.elseSections.forEach((sec) => {
+          const isElseSel = selectedItemId === sec.item.id;
+          const elseText = `[${sec.item.condition || 'else'}]`;
+          out += `<g class="svg-interactive" data-select-id="${sec.item.id}" data-select-type="step">`;
+          out += `<line x1="${boxLeft}" y1="${sec.y}" x2="${boxRight}" y2="${sec.y}" stroke="${isElseSel ? '#60a5fa' : '#4b4d57'}" stroke-width="${isElseSel ? '1.8' : '1.1'}" stroke-dasharray="5,4" />`;
+          out += `<text x="${boxLeft + 10}" y="${sec.y + 16}" fill="${isElseSel ? '#93c5fd' : '#cbd5e1'}" font-size="11" font-weight="500">${escapeXml(elseText)}</text>`;
+          out += `</g>`;
+        });
+      });
+
+      // Flèches et messages des étapes
+      layoutEntries.forEach((entry) => {
+        if (entry.type !== 'step') return;
+        const { item, y, isValid, isSelf, badgeNum } = entry;
+        if (!isValid) return;
+
+        const x1 = actorXMap[item.from];
+        const x2 = actorXMap[item.to];
+        const isSel = selectedItemId === item.id;
+        const isDashed = item.lineType === 'dashed';
+        const strokeCol = isSel ? '#60a5fa' : '#d4d4d8';
+        const marker = isDashed
+          ? (isSel ? 'url(#arrow-dashed-sel)' : 'url(#arrow-dashed)')
+          : (isSel ? 'url(#arrow-solid-sel)' : 'url(#arrow-solid)');
+        const dash = isDashed ? 'stroke-dasharray="5,4"' : '';
+        const textCol = isSel ? '#93c5fd' : '#e5e7eb';
+        const badgeR = 10;
+
+        out += `<g class="svg-interactive" data-select-id="${item.id}" data-select-type="step">`;
+
+        if (isSelf) {
+          const loopW = 30;
+          const loopH = 22;
+          out += `<rect class="hover-highlight" x="${x1 - 12}" y="${y - 12}" width="${Math.max(260, item.label.length * 6.4 + 50)}" height="${loopH + 24}" rx="6" fill="rgba(96,165,250,0.08)" opacity="${isSel ? '1' : '0'}" />`;
+          out += `<path d="M ${x1 + badgeR - 1} ${y} L ${x1 + loopW} ${y} L ${x1 + loopW} ${y + loopH} L ${x1 + 4} ${y + loopH}"
+            fill="none" stroke="${strokeCol}" stroke-width="1.3" ${dash} marker-end="${marker}" />`;
+          out += `<text x="${x1 + loopW + 10}" y="${y + loopH / 2 + 4}" text-anchor="start" fill="${textCol}" font-size="11.5" font-weight="400">${escapeXml(item.label)}</text>`;
+          out += `
+            <circle cx="${x1}" cy="${y}" r="${badgeR}" fill="#ffffff" stroke="#101114" stroke-width="1.2" />
+            <text x="${x1}" y="${y + 3.8}" text-anchor="middle" fill="#111827" font-size="10.5" font-weight="700">${escapeXml(badgeNum)}</text>
+          `;
+        } else {
+          const dir = x2 > x1 ? 1 : -1;
+          const startX = x1 + dir * badgeR;
+          const endX = x2 - dir * 3;
+          const span = Math.abs(x2 - x1);
+
+          out += `<rect class="hover-highlight" x="${Math.min(x1, x2) - 10}" y="${y - 20}" width="${span + 20}" height="32" rx="6" fill="rgba(96,165,250,0.08)" opacity="${isSel ? '1' : '0'}" />`;
+          out += `<line x1="${startX}" y1="${y}" x2="${endX}" y2="${y}" stroke="${strokeCol}" stroke-width="1.3" ${dash} marker-end="${marker}" />`;
+
+          const labelX = (x1 + x2) / 2;
+          out += `<text x="${labelX}" y="${y - 8}" text-anchor="middle" fill="${textCol}" font-size="11.5" font-weight="400">${escapeXml(item.label)}</text>`;
+          out += `
+            <circle cx="${x1}" cy="${y}" r="${badgeR}" fill="#ffffff" stroke="#101114" stroke-width="1.2" />
+            <text x="${x1}" y="${y + 3.8}" text-anchor="middle" fill="#111827" font-size="10.5" font-weight="700">${escapeXml(badgeNum)}</text>
+          `;
+        }
+
+        out += `</g>`;
+      });
+
+      // Cartes d'Observations bleues reliées par ligne pointillée
+      if (state.config.showObservations !== false && observations.length > 0) {
+        observations.forEach((obs) => {
+          const stepInfo = stepCoordsMap[obs.stepId];
+          if (!stepInfo) return;
+
+          const isSel = selectedItemId === obs.id;
+          const obsY = stepInfo.y;
+          const dotX = stepInfo.isSelf ? (stepInfo.fromX + 30) : stepInfo.toX;
+
+          // Ligne de liaison pointillée bleue
+          out += `
+            <g class="svg-interactive" data-select-id="${obs.id}" data-select-type="obs">
+              <circle cx="${dotX}" cy="${obsY}" r="3.5" fill="#38bdf8" />
+              <line x1="${dotX}" y1="${obsY}" x2="${obsColumnX}" y2="${obsY}" stroke="#0284c7" stroke-width="1.2" stroke-dasharray="3,3" />
+            </g>
+          `;
+
+          // Boîte d'observation bleue
+          const cardH = 44;
+          const cardY = obsY - cardH / 2;
+          out += `
+            <g class="svg-interactive" data-select-id="${obs.id}" data-select-type="obs">
+              <rect x="${obsColumnX}" y="${cardY}" width="${obsCardWidth}" height="${cardH}" rx="6"
+                fill="#0c1729" stroke="${isSel ? '#60a5fa' : '#0284c7'}" stroke-width="${isSel ? '1.8' : '1.3'}" />
+              <rect x="${obsColumnX + 8}" y="${cardY + 8}" width="14" height="14" rx="3" fill="#0284c7" />
+              <text x="${obsColumnX + 15}" y="${cardY + 19}" text-anchor="middle" fill="#ffffff" font-size="9.5" font-weight="800">i</text>
+              <text x="${obsColumnX + 27}" y="${cardY + 19}" fill="#38bdf8" font-size="10" font-weight="700" letter-spacing="0.2">${escapeXml(obs.title)}</text>
+              <text x="${obsColumnX + 10}" y="${cardY + 34}" fill="#cbd5e1" font-size="10" font-weight="400">${escapeXml(obs.text)}</text>
+            </g>
+          `;
+        });
+      }
+
+      // Matrice de Synthèse des Risques & Pistes d'Amélioration du Processus
+      if (hasMatrix) {
+        const tableX = 36;
+        const tableW = baseSvgWidth - 72;
+        const tableStartY = matrixStartY + 28;
+
+        // Titre de la matrice avec icône bouclier
+        out += `
+          <g>
+            <circle cx="${tableX + 10}" cy="${matrixStartY + 10}" r="8" fill="#0284c7" />
+            <path d="M ${tableX + 6.5} ${matrixStartY + 8} L ${tableX + 9} ${matrixStartY + 12} L ${tableX + 14} ${matrixStartY + 6}" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+            <text x="${tableX + 26}" y="${matrixStartY + 15}" fill="#ffffff" font-size="14.5" font-weight="700">Matrice de Synthèse des Risques &amp; Pistes d'Amélioration du Processus</text>
+          </g>
+        `;
+
+        // Cadre de la table
+        const totalRowsHeight = 32 + observations.length * 38;
+        out += `<rect x="${tableX}" y="${tableStartY}" width="${tableW}" height="${totalRowsHeight}" rx="7" fill="#14171f" stroke="#262c3b" stroke-width="1" />`;
+
+        // En-tête de la table
+        const col1W = 60;
+        const col2W = 320;
+        const col3W = 160;
+
+        out += `
+          <rect x="${tableX}" y="${tableStartY}" width="${tableW}" height="32" rx="7" fill="#1b212d" />
+          <line x1="${tableX}" y1="${tableStartY + 32}" x2="${tableX + tableW}" y2="${tableStartY + 32}" stroke="#262c3b" stroke-width="1" />
+          <text x="${tableX + 16}" y="${tableStartY + 21}" fill="#94a3b8" font-size="11" font-weight="600">Étape</text>
+          <text x="${tableX + col1W + 16}" y="${tableStartY + 21}" fill="#94a3b8" font-size="11" font-weight="600">Flux Concerné</text>
+          <text x="${tableX + col1W + col2W + 16}" y="${tableStartY + 21}" fill="#94a3b8" font-size="11" font-weight="600">Type d'Alerte</text>
+          <text x="${tableX + col1W + col2W + col3W + 16}" y="${tableStartY + 21}" fill="#94a3b8" font-size="11" font-weight="600">Risque ou Piste d'Amélioration Recommandée</text>
+        `;
+
+        // Lignes de données de la matrice
+        observations.forEach((obs, idx) => {
+          const rowY = tableStartY + 32 + idx * 38;
+          const stepInfo = stepCoordsMap[obs.stepId] || { badgeNum: '?', label: 'Étape non trouvée' };
+          const rowBg = idx % 2 === 0 ? 'rgba(255,255,255,0.015)' : 'rgba(255,255,255,0.035)';
+
+          out += `
+            <rect x="${tableX}" y="${rowY}" width="${tableW}" height="38" fill="${rowBg}" />
+            ${idx < observations.length - 1 ? `<line x1="${tableX}" y1="${rowY + 38}" x2="${tableX + tableW}" y2="${rowY + 38}" stroke="#222834" stroke-width="1" />` : ''}
+            <!-- Badge circulaire étape -->
+            <circle cx="${tableX + 28}" cy="${rowY + 19}" r="9.5" fill="#ffffff" />
+            <text x="${tableX + 28}" y="${rowY + 22.5}" text-anchor="middle" fill="#111827" font-size="10.5" font-weight="700">${escapeXml(stepInfo.badgeNum)}</text>
+            <!-- Flux concerné -->
+            <text x="${tableX + col1W + 16}" y="${rowY + 23}" fill="#e2e8f0" font-size="11.5" font-weight="400">${escapeXml(stepInfo.label)}</text>
+            <!-- Type d'alerte avec icône ampoule jaune -->
+            <g transform="translate(${tableX + col1W + col2W + 16}, ${rowY + 11})">
+              <text x="0" y="12" font-size="12">💡</text>
+              <text x="18" y="12" fill="#f59e0b" font-size="11.5" font-weight="700">${escapeXml(obs.alertType || 'Amélioration')}</text>
+            </g>
+            <!-- Risque ou Piste -->
+            <text x="${tableX + col1W + col2W + col3W + 16}" y="${rowY + 23}" fill="#cbd5e1" font-size="11.5" font-weight="400">${escapeXml(obs.recommendation || obs.text)}</text>
+          `;
+        });
+      }
+
+      svg.innerHTML = out;
+
+      // Clic interactif pour sélection
+      svg.querySelectorAll('[data-select-id]').forEach(el => {
+        el.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const id = el.getAttribute('data-select-id');
+          const type = el.getAttribute('data-select-type');
+          selectedItemId = id;
+          if (!sidebarVisible) toggleSidebar(true);
+          if (type === 'actor') switchTab('actors');
+          else if (type === 'obs') switchTab('obs');
+          else switchTab('steps');
+
+          renderSidebar();
+          renderDiagram();
+          setTimeout(() => {
+            const card = document.querySelector(`[data-card-id="${id}"]`);
+            if (card) card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }, 40);
+        });
+      });
+    }
+
+    /**
+     * Zoom & Ajustement
+     */
+    function applyZoom() {
+      const svg = document.getElementById('sequenceSvg');
+      const scaledW = Math.round(baseSvgWidth * currentZoom);
+      const scaledH = Math.round(baseSvgHeight * currentZoom);
+      svg.setAttribute('width', String(scaledW));
+      svg.setAttribute('height', String(scaledH));
+      document.getElementById('zoomLabel').textContent = `${Math.round(currentZoom * 100)}%`;
+    }
+
+    function setZoom(val) {
+      currentZoom = Math.min(1.5, Math.max(0.5, Math.round(val * 100) / 100));
+      applyZoom();
+    }
+
+    function fitToScreen() {
+      const vp = document.getElementById('diagramViewport');
+      const availW = Math.max(320, vp.clientWidth - 56);
+      const ratio = availW / baseSvgWidth;
+      setZoom(Math.min(1.0, Math.max(0.5, ratio)));
+    }
+
+    /**
+     * Rendu de la barre latérale
+     */
+    function renderSidebar() {
+      renderActorsList();
+      renderStepsList();
+      renderAltBlocksTab();
+      renderObservationsTab();
+      document.getElementById('actorCountBadge').textContent = state.actors.length;
+      document.getElementById('stepCountBadge').textContent = state.items.filter(i => i.kind === 'step').length;
+      document.getElementById('obsCountBadge').textContent = (state.observations || []).length;
+    }
+
+    function renderActorsList() {
+      const container = document.getElementById('actorsListContainer');
+      if (!container) return;
+      if (state.actors.length === 0) {
+        container.innerHTML = `<div style="text-align:center;font-size:12px;color:#9ca3af;padding:20px;">Aucun acteur.</div>`;
+        return;
+      }
+
+      container.innerHTML = state.actors.map((act, idx) => {
+        const isSel = selectedItemId === act.id;
+        return `
+          <div data-card-id="${act.id}" class="card ${isSel ? 'selected' : ''}">
+            <div class="card-header">
+              <span style="font-size:11px;font-weight:700;color:#9ca3af;">ACTEUR #${idx + 1}</span>
+              <div class="card-actions">
+                <button data-act-move="left" data-idx="${idx}" ${idx === 0 ? 'disabled' : ''} class="btn btn-xs" title="Gauche">←</button>
+                <button data-act-move="right" data-idx="${idx}" ${idx === state.actors.length - 1 ? 'disabled' : ''} class="btn btn-xs" title="Droite">→</button>
+                <button data-act-del="${idx}" class="btn btn-danger btn-xs" title="Supprimer">✕</button>
+              </div>
+            </div>
+            <input type="text" data-act-name="${act.id}" value="${escapeHtml(act.name)}" class="form-input" placeholder="Nom..." />
+            <select data-act-type="${act.id}" class="form-select" style="font-size:11.5px;">
+              <option value="actor" ${act.type === 'actor' ? 'selected' : ''}>Icône Personnage au-dessus (Actor)</option>
+              <option value="participant" ${act.type !== 'actor' ? 'selected' : ''}>Boîte Rectangulaire (Participant)</option>
+            </select>
+          </div>
+        `;
+      }).join('');
+
+      container.querySelectorAll('[data-act-name]').forEach(inp => {
+        inp.addEventListener('input', (e) => {
+          const act = state.actors.find(a => a.id === e.target.getAttribute('data-act-name'));
+          if (act) { act.name = e.target.value; saveState(); renderStepsList(); renderDiagram(); }
+        });
+      });
+
+      container.querySelectorAll('[data-act-type]').forEach(sel => {
+        sel.addEventListener('change', (e) => {
+          const act = state.actors.find(a => a.id === e.target.getAttribute('data-act-type'));
+          if (act) { act.type = e.target.value; saveState(); renderDiagram(); }
+        });
+      });
+
+      container.querySelectorAll('[data-act-move]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = Number(btn.getAttribute('data-idx'));
+          const dir = btn.getAttribute('data-act-move');
+          const swapIdx = dir === 'left' ? idx - 1 : idx + 1;
+          if (swapIdx < 0 || swapIdx >= state.actors.length) return;
+          [state.actors[idx], state.actors[swapIdx]] = [state.actors[swapIdx], state.actors[idx]];
+          saveState(); renderSidebar(); renderDiagram();
+        });
+      });
+
+      container.querySelectorAll('[data-act-del]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = Number(btn.getAttribute('data-act-del'));
+          if (state.actors.length <= 1) { showToast('Impossible de supprimer le dernier acteur', true); return; }
+          const removed = state.actors.splice(idx, 1)[0];
+          const fallback = state.actors[0].id;
+          state.items.forEach(it => {
+            if (it.kind === 'step') {
+              if (it.from === removed.id) it.from = fallback;
+              if (it.to === removed.id) it.to = fallback;
+            }
+          });
+          if (selectedItemId === removed.id) selectedItemId = null;
+          saveState(); renderSidebar(); renderDiagram();
+          showToast('Acteur supprimé');
+        });
+      });
+    }
+
+    function renderStepsList() {
+      const container = document.getElementById('stepsListContainer');
+      if (state.items.length === 0) {
+        container.innerHTML = `<div style="text-align:center;font-size:12px;color:#9ca3af;padding:20px;">Aucune étape.</div>`;
+        return;
+      }
+
+      let badgeCounter = 1;
+      let depth = 0;
+
+      container.innerHTML = state.items.map((item, idx) => {
+        const isSel = selectedItemId === item.id;
+        const controls = `
+          <div class="card-actions">
+            <button data-item-move="up" data-idx="${idx}" ${idx === 0 ? 'disabled' : ''} class="btn btn-xs" title="Monter">↑</button>
+            <button data-item-move="down" data-idx="${idx}" ${idx === state.items.length - 1 ? 'disabled' : ''} class="btn btn-xs" title="Descendre">↓</button>
+            <button data-item-del="${idx}" class="btn btn-danger btn-xs" title="Supprimer">✕</button>
+          </div>
+        `;
+
+        if (item.kind === 'alt_start') {
+          depth++;
+          return `
+            <div data-card-id="${item.id}" class="card alt-card ${isSel ? 'selected' : ''}">
+              <div class="card-header">
+                <span style="font-size:11px;font-weight:700;color:#fcd34d;">DÉBUT [ALT] (Niv. ${depth})</span>
+                ${controls}
+              </div>
+              <input type="text" data-alt-cond="${item.id}" value="${escapeHtml(item.condition || '')}" class="form-input" placeholder="Condition..." />
+            </div>
+          `;
+        }
+
+        if (item.kind === 'alt_else') {
+          return `
+            <div data-card-id="${item.id}" class="card alt-card indented ${isSel ? 'selected' : ''}">
+              <div class="card-header">
+                <span style="font-size:11px;font-weight:700;color:#fbbf24;">SÉPARATEUR [ELSE]</span>
+                ${controls}
+              </div>
+              <input type="text" data-alt-cond="${item.id}" value="${escapeHtml(item.condition || '')}" class="form-input" placeholder="Condition..." />
+            </div>
+          `;
+        }
+
+        if (item.kind === 'alt_end') {
+          if (depth > 0) depth--;
+          return `
+            <div data-card-id="${item.id}" class="card alt-card ${isSel ? 'selected' : ''}" style="padding:7px 10px;">
+              <div class="card-header">
+                <span style="font-size:11px;font-weight:700;color:#d97706;">FIN DU BLOC [ALT]</span>
+                ${controls}
+              </div>
+            </div>
+          `;
+        }
+
+        const badgeNum = state.config.autoBadge ? badgeCounter++ : (item.badge || badgeCounter++);
+        const optsFrom = state.actors.map(a => `<option value="${a.id}" ${a.id === item.from ? 'selected' : ''}>${escapeHtml(a.name)}</option>`).join('');
+        const optsTo = state.actors.map(a => `<option value="${a.id}" ${a.id === item.to ? 'selected' : ''}>${escapeHtml(a.name)}</option>`).join('');
+
+        return `
+          <div data-card-id="${item.id}" class="card ${depth > 0 ? 'indented' : ''} ${isSel ? 'selected' : ''}">
+            <div class="card-header">
+              <div style="display:flex;align-items:center;gap:6px;">
+                ${state.config.autoBadge
+                  ? `<span class="badge-pill">${badgeNum}</span>`
+                  : `<input type="text" data-step-badge="${item.id}" value="${escapeHtml(item.badge || badgeNum)}" class="badge-pill" style="border:none;text-align:center;width:24px;" />`
+                }
+                <select data-step-linetype="${item.id}" class="form-select" style="padding:3px 6px;font-size:11px;width:auto;">
+                  <option value="solid" ${item.lineType === 'solid' ? 'selected' : ''}>Pleine (──▶)</option>
+                  <option value="dashed" ${item.lineType === 'dashed' ? 'selected' : ''}>Pointillée (- - ▶)</option>
+                </select>
+              </div>
+              ${controls}
+            </div>
+            <div class="route-row">
+              <select data-step-from="${item.id}" class="form-select" style="font-size:11px;">${optsFrom}</select>
+              <span style="color:#9ca3af;font-weight:700;font-size:12px;">→</span>
+              <select data-step-to="${item.id}" class="form-select" style="font-size:11px;">${optsTo}</select>
+            </div>
+            <input type="text" data-step-label="${item.id}" value="${escapeHtml(item.label)}" class="form-input" placeholder="Libellé du message..." />
+          </div>
+        `;
+      }).join('');
+
+      container.querySelectorAll('[data-step-label]').forEach(inp => {
+        inp.addEventListener('input', (e) => {
+          const it = state.items.find(x => x.id === e.target.getAttribute('data-step-label'));
+          if (it) { it.label = e.target.value; saveState(); renderDiagram(); }
+        });
+      });
+
+      container.querySelectorAll('[data-step-badge]').forEach(inp => {
+        inp.addEventListener('input', (e) => {
+          const it = state.items.find(x => x.id === e.target.getAttribute('data-step-badge'));
+          if (it) { it.badge = e.target.value; saveState(); renderDiagram(); }
+        });
+      });
+
+      container.querySelectorAll('[data-step-from]').forEach(sel => {
+        sel.addEventListener('change', (e) => {
+          const it = state.items.find(x => x.id === e.target.getAttribute('data-step-from'));
+          if (it) { it.from = e.target.value; saveState(); renderDiagram(); }
+        });
+      });
+
+      container.querySelectorAll('[data-step-to]').forEach(sel => {
+        sel.addEventListener('change', (e) => {
+          const it = state.items.find(x => x.id === e.target.getAttribute('data-step-to'));
+          if (it) { it.to = e.target.value; saveState(); renderDiagram(); }
+        });
+      });
+
+      container.querySelectorAll('[data-step-linetype]').forEach(sel => {
+        sel.addEventListener('change', (e) => {
+          const it = state.items.find(x => x.id === e.target.getAttribute('data-step-linetype'));
+          if (it) { it.lineType = e.target.value; saveState(); renderDiagram(); }
+        });
+      });
+
+      container.querySelectorAll('[data-alt-cond]').forEach(inp => {
+        inp.addEventListener('input', (e) => {
+          const it = state.items.find(x => x.id === e.target.getAttribute('data-alt-cond'));
+          if (it) { it.condition = e.target.value; saveState(); renderAltBlocksTab(); renderDiagram(); }
+        });
+      });
+
+      container.querySelectorAll('[data-item-move]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = Number(btn.getAttribute('data-idx'));
+          const dir = btn.getAttribute('data-item-move');
+          const swapIdx = dir === 'up' ? idx - 1 : idx + 1;
+          if (swapIdx < 0 || swapIdx >= state.items.length) return;
+          [state.items[idx], state.items[swapIdx]] = [state.items[swapIdx], state.items[idx]];
+          saveState(); renderSidebar(); renderDiagram();
+        });
+      });
+
+      container.querySelectorAll('[data-item-del]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = Number(btn.getAttribute('data-item-del'));
+          state.items.splice(idx, 1);
+          saveState(); renderSidebar(); renderDiagram();
+          showToast('Élément supprimé');
+        });
+      });
+    }
+
+    function renderAltBlocksTab() {
+      const container = document.getElementById('altBlocksContainer');
+      if (!container) return;
+
+      const altItems = state.items
+        .map((item, idx) => ({ item, idx }))
+        .filter(entry => entry.item.kind === 'alt_start' || entry.item.kind === 'alt_else');
+
+      if (altItems.length === 0) {
+        container.innerHTML = `<div style="text-align:center;font-size:12px;color:#9ca3af;padding:20px;">Aucun bloc conditionnel.</div>`;
+        return;
+      }
+
+      container.innerHTML = altItems.map(({ item, idx }) => {
+        const isStart = item.kind === 'alt_start';
+        return `
+          <div class="card alt-card">
+            <div class="card-header">
+              <span style="font-size:11px;font-weight:700;color:${isStart ? '#fcd34d' : '#fbbf24'};">
+                ${isStart ? 'CONDITION [ALT]' : 'BRANCHE [ELSE]'}
+              </span>
+              <div class="card-actions">
+                ${isStart ? `<button data-add-else-after="${idx}" class="btn btn-xs" title="Ajouter un [else]">+ Else</button>` : ''}
+                <button data-alt-tab-del="${idx}" class="btn btn-danger btn-xs" title="Supprimer">✕</button>
+              </div>
+            </div>
+            <input type="text" data-alt-tab-cond="${item.id}" value="${escapeHtml(item.condition || '')}" class="form-input" placeholder="Condition..." />
+          </div>
+        `;
+      }).join('');
+
+      container.querySelectorAll('[data-alt-tab-cond]').forEach(inp => {
+        inp.addEventListener('input', (e) => {
+          const it = state.items.find(x => x.id === e.target.getAttribute('data-alt-tab-cond'));
+          if (it) { it.condition = e.target.value; saveState(); renderStepsList(); renderDiagram(); }
+        });
+      });
+
+      container.querySelectorAll('[data-add-else-after]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const startIdx = Number(btn.getAttribute('data-add-else-after'));
+          state.items.splice(startIdx + 1, 0, {
+            id: uid('else'),
+            kind: 'alt_else',
+            condition: 'Autre condition'
+          });
+          saveState(); renderSidebar(); renderDiagram();
+          showToast('Branche [else] ajoutée');
+        });
+      });
+
+      container.querySelectorAll('[data-alt-tab-del]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = Number(btn.getAttribute('data-alt-tab-del'));
+          state.items.splice(idx, 1);
+          saveState(); renderSidebar(); renderDiagram();
+          showToast('Condition supprimée');
+        });
+      });
+    }
+
+    function renderObservationsTab() {
+      const container = document.getElementById('observationsContainer');
+      if (!container) return;
+
+      const observations = state.observations || [];
+      if (observations.length === 0) {
+        container.innerHTML = `<div style="text-align:center;font-size:12px;color:#9ca3af;padding:20px;">Aucune observation. Cliquez sur "+ Observation".</div>`;
+        return;
+      }
+
+      const stepOptions = state.items
+        .filter(it => it.kind === 'step')
+        .map(it => `<option value="${it.id}">${escapeHtml(it.label)}</option>`)
+        .join('');
+
+      container.innerHTML = observations.map((obs, idx) => {
+        const isSel = selectedItemId === obs.id;
+        return `
+          <div data-card-id="${obs.id}" class="card obs-card ${isSel ? 'selected' : ''}">
+            <div class="card-header">
+              <span style="font-size:11px;font-weight:700;color:#38bdf8;">OBSERVATION #${idx + 1}</span>
+              <button data-obs-del="${idx}" class="btn btn-danger btn-xs" title="Supprimer">✕</button>
+            </div>
+            <div>
+              <label style="font-size:10.5px;color:#9ca3af;display:block;margin-bottom:3px;">Liée à l'étape :</label>
+              <select data-obs-step="${obs.id}" class="form-select" style="font-size:11px;">
+                ${state.items.filter(it => it.kind === 'step').map(it => `<option value="${it.id}" ${it.id === obs.stepId ? 'selected' : ''}>${escapeHtml(it.label)}</option>`).join('')}
+              </select>
+            </div>
+            <div>
+              <label style="font-size:10.5px;color:#9ca3af;display:block;margin-bottom:3px;">En-tête de la boîte :</label>
+              <input type="text" data-obs-title="${obs.id}" value="${escapeHtml(obs.title || 'OBSERVATION:')}" class="form-input" placeholder="Ex: OBSERVATION:" />
+            </div>
+            <div>
+              <label style="font-size:10.5px;color:#9ca3af;display:block;margin-bottom:3px;">Texte de l'observation :</label>
+              <input type="text" data-obs-text="${obs.id}" value="${escapeHtml(obs.text || '')}" class="form-input" placeholder="Description de l'observation..." />
+            </div>
+            <div>
+              <label style="font-size:10.5px;color:#9ca3af;display:block;margin-bottom:3px;">Type d'alerte (Matrice) :</label>
+              <input type="text" data-obs-type="${obs.id}" value="${escapeHtml(obs.alertType || 'Amélioration')}" class="form-input" placeholder="Amélioration / Risque..." />
+            </div>
+            <div>
+              <label style="font-size:10.5px;color:#9ca3af;display:block;margin-bottom:3px;">Recommandation (Matrice) :</label>
+              <input type="text" data-obs-rec="${obs.id}" value="${escapeHtml(obs.recommendation || obs.text || '')}" class="form-input" placeholder="Texte dans le tableau de synthèse..." />
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      container.querySelectorAll('[data-obs-step]').forEach(sel => {
+        sel.addEventListener('change', (e) => {
+          const obs = state.observations.find(o => o.id === e.target.getAttribute('data-obs-step'));
+          if (obs) { obs.stepId = e.target.value; saveState(); renderDiagram(); }
+        });
+      });
+
+      container.querySelectorAll('[data-obs-title]').forEach(inp => {
+        inp.addEventListener('input', (e) => {
+          const obs = state.observations.find(o => o.id === e.target.getAttribute('data-obs-title'));
+          if (obs) { obs.title = e.target.value; saveState(); renderDiagram(); }
+        });
+      });
+
+      container.querySelectorAll('[data-obs-text]').forEach(inp => {
+        inp.addEventListener('input', (e) => {
+          const obs = state.observations.find(o => o.id === e.target.getAttribute('data-obs-text'));
+          if (obs) { obs.text = e.target.value; saveState(); renderDiagram(); }
+        });
+      });
+
+      container.querySelectorAll('[data-obs-type]').forEach(inp => {
+        inp.addEventListener('input', (e) => {
+          const obs = state.observations.find(o => o.id === e.target.getAttribute('data-obs-type'));
+          if (obs) { obs.alertType = e.target.value; saveState(); renderDiagram(); }
+        });
+      });
+
+      container.querySelectorAll('[data-obs-rec]').forEach(inp => {
+        inp.addEventListener('input', (e) => {
+          const obs = state.observations.find(o => o.id === e.target.getAttribute('data-obs-rec'));
+          if (obs) { obs.recommendation = e.target.value; saveState(); renderDiagram(); }
+        });
+      });
+
+      container.querySelectorAll('[data-obs-del]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = Number(btn.getAttribute('data-obs-del'));
+          state.observations.splice(idx, 1);
+          saveState(); renderSidebar(); renderDiagram();
+          showToast('Observation supprimée');
+        });
+      });
+    }
+
+    /**
+     * Stockage USB et Export
+     */
+    async function saveToUsb() {
+      const payload = JSON.stringify(state, null, 2);
+      const suggestedName = `${slugifyFilename(state.title)}.json`;
+
+      if (window.showSaveFilePicker) {
+        try {
+          if (!usbFileHandle) {
+            usbFileHandle = await window.showSaveFilePicker({
+              suggestedName,
+              types: [{ description: 'Diagramme UML (.json)', accept: { 'application/json': ['.json'] } }]
+            });
+          }
+          const writable = await usbFileHandle.createWritable();
+          await writable.write(payload);
+          await writable.close();
+          updateSaveStatus(`Enregistré sur USB (${usbFileHandle.name})`, true);
+          showToast(`Sauvegardé sur clé USB : ${usbFileHandle.name}`);
+          return;
+        } catch (err) {
+          if (err && err.name === 'AbortError') return;
+          usbFileHandle = null;
+        }
+      }
+
+      const blob = new Blob([payload], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = suggestedName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      updateSaveStatus('Fichier USB téléchargé', true);
+      showToast(`Fichier "${suggestedName}" téléchargé`);
+    }
+
+    async function openFromUsb() {
+      if (window.showOpenFilePicker) {
+        try {
+          const [handle] = await window.showOpenFilePicker({
+            types: [{ description: 'Diagramme UML (.json)', accept: { 'application/json': ['.json'] } }],
+            multiple: false
+          });
+          const file = await handle.getFile();
+          const text = await file.text();
+          const parsed = JSON.parse(text);
+          if (parsed && Array.isArray(parsed.actors) && Array.isArray(parsed.items)) {
+            usbFileHandle = handle;
+            state = parsed;
+            selectedItemId = null;
+            syncInputsFromState();
+            saveState();
+            renderSidebar();
+            renderDiagram();
+            fitToScreen();
+            updateSaveStatus(`Chargé depuis USB (${handle.name})`, true);
+            showToast(`Diagramme chargé depuis ${handle.name}`);
+          } else {
+            showToast('Fichier JSON invalide', true);
+          }
+          return;
+        } catch (err) {
+          if (err && err.name === 'AbortError') return;
+        }
+      }
+      document.getElementById('uploadJsonInput').click();
+    }
+
+    let pendingExportFormat = 'png';
+
+    function openExportModal(format) {
+      pendingExportFormat = format;
+      const modal = document.getElementById('exportModal');
+      document.getElementById('exportModalTitle').textContent = format === 'png'
+        ? 'Exporter en Image Haute Définition (PNG)'
+        : 'Exporter en Vectoriel (SVG)';
+      document.getElementById('exportConfirmBtn').textContent = format === 'png'
+        ? 'Télécharger le PNG'
+        : 'Télécharger le SVG';
+      document.getElementById('exportDiagramNameInput').value = state.title || "Processus d'Accueil et Gestion des Visites";
+      document.getElementById('exportSubtitleInput').value = state.subtitle || '';
+      modal.classList.add('open');
+    }
+
+    function executeExportWithTitle() {
+      const nameInput = document.getElementById('exportDiagramNameInput');
+      const subInput = document.getElementById('exportSubtitleInput');
+      const chosenTitle = nameInput.value.trim() || 'Diagramme de Séquence';
+      const chosenSub = subInput.value.trim();
+
+      state.title = chosenTitle;
+      state.subtitle = chosenSub;
+      document.getElementById('headerDiagramTitle').value = chosenTitle;
+      saveState();
+      document.getElementById('exportModal').classList.remove('open');
+
+      if (pendingExportFormat === 'svg') exportSvg(chosenTitle, chosenSub);
+      else exportPng(chosenTitle, chosenSub);
+    }
+
+    function exportSvg(diagramTitle, diagramSubtitle) {
+      const prevSel = selectedItemId;
+      selectedItemId = null;
+      renderDiagram({ forceTitle: true, customTitle: diagramTitle, customSubtitle: diagramSubtitle });
+
+      const svg = document.getElementById('sequenceSvg');
+      const clone = svg.cloneNode(true);
+      clone.setAttribute('width', String(baseSvgWidth));
+      clone.setAttribute('height', String(baseSvgHeight));
+
+      const serializer = new XMLSerializer();
+      let source = serializer.serializeToString(clone);
+      if (!source.match(/^<svg[^>]+xmlns="http:\/\/www\.w3\.org\/2000\/svg"/)) {
+        source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
+      }
+
+      const fileName = `${slugifyFilename(diagramTitle)}.svg`;
+      const blob = new Blob(['<?xml version="1.0" encoding="UTF-8"?>\n' + source], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      selectedItemId = prevSel;
+      renderDiagram();
+      showToast(`SVG exporté : ${fileName}`);
+    }
+
+    function exportPng(diagramTitle, diagramSubtitle) {
+      const prevSel = selectedItemId;
+      selectedItemId = null;
+      renderDiagram({ forceTitle: true, customTitle: diagramTitle, customSubtitle: diagramSubtitle });
+
+      const svg = document.getElementById('sequenceSvg');
+      const clone = svg.cloneNode(true);
+      clone.setAttribute('width', String(baseSvgWidth));
+      clone.setAttribute('height', String(baseSvgHeight));
+
+      const serializer = new XMLSerializer();
+      let source = serializer.serializeToString(clone);
+      if (!source.match(/^<svg[^>]+xmlns="http:\/\/www\.w3\.org\/2000\/svg"/)) {
+        source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
+      }
+
+      const fileName = `${slugifyFilename(diagramTitle)}.png`;
+      const svgBlob = new Blob([source], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(svgBlob);
+      const img = new Image();
+
+      img.onload = () => {
+        const scale = 2; // Rendu 2x très net
+        const canvas = document.createElement('canvas');
+        canvas.width = baseSvgWidth * scale;
+        canvas.height = baseSvgHeight * scale;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#101114';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.scale(scale, scale);
+        ctx.drawImage(img, 0, 0);
+        URL.revokeObjectURL(url);
+
+        canvas.toBlob((blob) => {
+          if (!blob) { showToast('Erreur export PNG', true); return; }
+          const pngUrl = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = pngUrl;
+          a.download = fileName;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(pngUrl);
+
+          selectedItemId = prevSel;
+          renderDiagram();
+          showToast(`Image exportée : ${fileName}`);
+        }, 'image/png');
+      };
+
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        selectedItemId = prevSel;
+        renderDiagram();
+        showToast('Erreur rendu PNG', true);
+      };
+
+      img.src = url;
+    }
+
+    function syncInputsFromState() {
+      document.getElementById('headerDiagramTitle').value = state.title || '';
+      document.getElementById('autoBadgeToggle').checked = Boolean(state.config.autoBadge);
+      document.getElementById('showTitleOnCanvasToggle').checked = state.config.showTitleOnCanvas !== false;
+      document.getElementById('showObservationsToggle').checked = state.config.showObservations !== false;
+      document.getElementById('showMatrixToggle').checked = state.config.showMatrix !== false;
+      document.getElementById('colSpacingRange').value = state.config.colSpacing;
+      document.getElementById('colSpacingVal').textContent = `${state.config.colSpacing} px`;
+      document.getElementById('rowSpacingRange').value = state.config.rowSpacing;
+      document.getElementById('rowSpacingVal').textContent = `${state.config.rowSpacing} px`;
+    }
+
+    function switchTab(name) {
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-tab') === name);
+      });
+      document.querySelectorAll('.tab-pane').forEach(pane => {
+        pane.classList.toggle('active', pane.id === `tab-${name}`);
+      });
+    }
+
+    function toggleSidebar(force) {
+      sidebarVisible = typeof force === 'boolean' ? force : !sidebarVisible;
+      const sb = document.getElementById('editorSidebar');
+      sb.classList.toggle('collapsed', !sidebarVisible);
+      document.getElementById('toggleSidebarLabel').textContent = sidebarVisible ? "Masquer" : "Afficher";
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      syncInputsFromState();
+
+      document.getElementById('headerDiagramTitle').addEventListener('input', (e) => {
+        state.title = e.target.value;
+        saveState();
+        renderDiagram();
+      });
+
+      document.getElementById('showTitleOnCanvasToggle').addEventListener('change', (e) => {
+        state.config.showTitleOnCanvas = e.target.checked;
+        saveState();
+        renderDiagram();
+      });
+
+      document.getElementById('showObservationsToggle').addEventListener('change', (e) => {
+        state.config.showObservations = e.target.checked;
+        saveState();
+        renderDiagram();
+      });
+
+      document.getElementById('showMatrixToggle').addEventListener('change', (e) => {
+        state.config.showMatrix = e.target.checked;
+        saveState();
+        renderDiagram();
+      });
+
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => switchTab(btn.getAttribute('data-tab')));
+      });
+
+      document.getElementById('toggleSidebarBtn').addEventListener('click', () => toggleSidebar());
+
+      document.getElementById('diagramViewport').addEventListener('click', (e) => {
+        if (e.target.id === 'diagramViewport' || e.target.id === 'sequenceSvg') {
+          selectedItemId = null;
+          renderSidebar();
+          renderDiagram();
+        }
+      });
+
+      document.getElementById('addActorBtn').addEventListener('click', () => {
+        const act = { id: uid('act'), name: `Acteur ${state.actors.length + 1}`, type: 'participant' };
+        state.actors.push(act);
+        selectedItemId = act.id;
+        saveState(); renderSidebar(); renderDiagram();
+        showToast('Nouvel acteur ajouté');
+      });
+
+      document.getElementById('addStepBtn').addEventListener('click', () => {
+        if (state.actors.length === 0) return;
+        const fromId = state.actors[0].id;
+        const toId = state.actors.length > 1 ? state.actors[1].id : fromId;
+        const n = state.items.filter(i => i.kind === 'step').length + 1;
+        const stp = { id: uid('stp'), kind: 'step', from: fromId, to: toId, lineType: 'solid', badge: String(n), label: `${n}. Nouvelle étape` };
+        state.items.push(stp);
+        selectedItemId = stp.id;
+        saveState(); renderSidebar(); renderDiagram();
+        const sc = document.getElementById('stepsListContainer');
+        sc.scrollTop = sc.scrollHeight;
+        showToast('Étape ajoutée');
+      });
+
+      const triggerAddAlt = () => {
+        const f = state.actors[0]?.id || 'act_client';
+        const t = state.actors[1]?.id || f;
+        const s1 = { id: uid('alt'), kind: 'alt_start', tag: 'alt', condition: 'Condition 1' };
+        const m1 = { id: uid('stp'), kind: 'step', from: f, to: t, lineType: 'solid', badge: '', label: 'Action si condition 1' };
+        const el = { id: uid('else'), kind: 'alt_else', condition: 'Condition 2' };
+        const m2 = { id: uid('stp'), kind: 'step', from: t, to: f, lineType: 'dashed', badge: '', label: 'Action sinon' };
+        const en = { id: uid('end'), kind: 'alt_end' };
+        state.items.push(s1, m1, el, m2, en);
+        selectedItemId = s1.id;
+        saveState(); renderSidebar(); renderDiagram();
+        showToast('Bloc [alt] ajouté');
+      };
+
+      document.getElementById('addAltBtn').addEventListener('click', triggerAddAlt);
+      document.getElementById('addAltTabBtn').addEventListener('click', triggerAddAlt);
+
+      document.getElementById('addObsBtn').addEventListener('click', () => {
+        const steps = state.items.filter(it => it.kind === 'step');
+        const stepId = steps.length > 0 ? steps[steps.length - 1].id : '';
+        const obs = {
+          id: uid('obs'),
+          stepId,
+          title: 'OBSERVATION:',
+          text: 'Nouvelle observation',
+          alertType: 'Amélioration',
+          recommendation: 'Piste d\'amélioration'
+        };
+        if (!state.observations) state.observations = [];
+        state.observations.push(obs);
+        selectedItemId = obs.id;
+        saveState(); renderSidebar(); renderDiagram();
+        switchTab('obs');
+        showToast('Observation ajoutée');
+      });
+
+      document.getElementById('autoBadgeToggle').addEventListener('change', (e) => {
+        state.config.autoBadge = e.target.checked;
+        saveState(); renderSidebar(); renderDiagram();
+      });
+
+      document.getElementById('colSpacingRange').addEventListener('input', (e) => {
+        state.config.colSpacing = Number(e.target.value);
+        document.getElementById('colSpacingVal').textContent = `${state.config.colSpacing} px`;
+        saveState(); renderDiagram();
+      });
+
+      document.getElementById('rowSpacingRange').addEventListener('input', (e) => {
+        state.config.rowSpacing = Number(e.target.value);
+        document.getElementById('rowSpacingVal').textContent = `${state.config.rowSpacing} px`;
+        saveState(); renderDiagram();
+      });
+
+      document.getElementById('resetOriginalBtn').addEventListener('click', () => {
+        openConfirm('Réinitialiser le diagramme ?', 'Restaurer le modèle original avec les 11 étapes, observations et matrice ?', () => {
+          state = getDefaultDiagramData();
+          selectedItemId = null;
+          usbFileHandle = null;
+          syncInputsFromState();
+          saveState(); renderSidebar(); renderDiagram();
+          fitToScreen();
+          showToast('Modèle restauré');
+        });
+      });
+
+      document.getElementById('clearAllBtn').addEventListener('click', () => {
+        openConfirm('Vider le diagramme ?', 'Supprimer toutes les étapes et observations actuelles ?', () => {
+          state = {
+            title: state.title,
+            subtitle: state.subtitle,
+            config: { ...state.config },
+            actors: [
+              { id: 'act_1', name: 'Acteur 1', type: 'participant' },
+              { id: 'act_2', name: 'Acteur 2', type: 'participant' }
+            ],
+            items: [],
+            observations: []
+          };
+          selectedItemId = null;
+          saveState(); renderSidebar(); renderDiagram();
+          showToast('Diagramme vidé');
+        });
+      });
+
+      document.getElementById('quickUsbSaveBtn').addEventListener('click', saveToUsb);
+      document.getElementById('usbSaveDirectBtn').addEventListener('click', saveToUsb);
+      document.getElementById('usbOpenDirectBtn').addEventListener('click', openFromUsb);
+
+      document.getElementById('uploadJsonInput').addEventListener('change', (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          try {
+            const parsed = JSON.parse(ev.target.result);
+            if (parsed && Array.isArray(parsed.actors) && Array.isArray(parsed.items)) {
+              state = parsed;
+              selectedItemId = null;
+              syncInputsFromState();
+              saveState(); renderSidebar(); renderDiagram();
+              fitToScreen();
+              updateSaveStatus(`Chargé depuis ${file.name}`, true);
+              showToast(`Fichier "${file.name}" chargé`);
+            } else {
+              showToast('Fichier JSON invalide', true);
+            }
+          } catch (err) {
+            showToast('Erreur lecture du fichier USB', true);
+          }
+        };
+        reader.readAsText(file);
+        e.target.value = '';
+      });
+
+      document.getElementById('exportPngBtn').addEventListener('click', () => openExportModal('png'));
+      document.getElementById('exportSvgBtn').addEventListener('click', () => openExportModal('svg'));
+      document.getElementById('exportCancelBtn').addEventListener('click', () => {
+        document.getElementById('exportModal').classList.remove('open');
+      });
+      document.getElementById('exportConfirmBtn').addEventListener('click', executeExportWithTitle);
+      document.getElementById('exportDiagramNameInput').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') executeExportWithTitle();
+      });
+
+      document.getElementById('zoomInBtn').addEventListener('click', () => setZoom(currentZoom + 0.1));
+      document.getElementById('zoomOutBtn').addEventListener('click', () => setZoom(currentZoom - 0.1));
+      document.getElementById('zoomFitBtn').addEventListener('click', fitToScreen);
+
+      renderSidebar();
+      renderDiagram();
+      fitToScreen();
+    });
+  </script>
+</body>
+</html>
