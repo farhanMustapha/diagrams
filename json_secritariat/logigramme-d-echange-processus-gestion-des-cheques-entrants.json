@@ -1,0 +1,224 @@
+{
+  "title": "LOGIGRAMME D'ÉCHANGE — PROCESSUS : GESTION DES CHÈQUES ENTRANTS",
+  "subtitle": "Cabinet FIZAZI (Expertise Comptable & CAC) • Règlements Clients & Remises en Banque",
+  "config": {
+    "colSpacing": 270,
+    "rowSpacing": 50,
+    "autoBadge": true,
+    "showTitleOnCanvas": true
+  },
+  "actors": [
+    {
+      "id": "act_1",
+      "name": "Client / Porteur du Chèque",
+      "type": "participant"
+    },
+    {
+      "id": "act_2",
+      "name": "Secrétariat",
+      "type": "participant"
+    },
+    {
+      "id": "act_3",
+      "name": "Comptabilité Interne",
+      "type": "participant"
+    },
+    {
+      "id": "act_4",
+      "name": "Direction (M. FIZAZI)",
+      "type": "participant"
+    },
+    {
+      "id": "act_5",
+      "name": "Coursier",
+      "type": "participant"
+    },
+    {
+      "id": "act_6",
+      "name": "Guichet Bancaire",
+      "type": "participant"
+    }
+  ],
+  "items": [
+    {
+      "id": "stp_1",
+      "kind": "step",
+      "from": "act_1",
+      "to": "act_2",
+      "lineType": "solid",
+      "badge": "1",
+      "label": "1. Remise physique du chèque de règlement",
+      "observation": null
+    },
+    {
+      "id": "stp_3",
+      "kind": "step",
+      "from": "act_2",
+      "to": "act_2",
+      "lineType": "solid",
+      "badge": "3",
+      "label": "3. Identification précise de la personne ayant déposé le chèque",
+      "observation": null
+    },
+    {
+      "id": "stp_2",
+      "kind": "step",
+      "from": "act_2",
+      "to": "act_1",
+      "lineType": "dashed",
+      "badge": "2",
+      "label": "2. Émission d'un accusé de réception ",
+      "observation": {
+        "enabled": false,
+        "title": "Sécurisation du reçu",
+        "detail": "Délivrance systématique d'une souche de reçu numérotée mentionnant le numéro et la banque émettrice du chèque.",
+        "alertType": "Amélioration"
+      }
+    },
+    {
+      "id": "stp_4",
+      "kind": "step",
+      "from": "act_2",
+      "to": "act_2",
+      "lineType": "solid",
+      "badge": "4",
+      "label": "4. Numérisation (scan) recto-verso du chèque",
+      "observation": null
+    },
+    {
+      "id": "stp_5",
+      "kind": "step",
+      "from": "act_2",
+      "to": "act_2",
+      "lineType": "solid",
+      "badge": "5",
+      "label": "5. Saisie immédiate des informations sur l'État des Valeurs (Journal chèques)",
+      "observation": null
+    },
+    {
+      "id": "stp_6",
+      "kind": "step",
+      "from": "act_2",
+      "to": "act_3",
+      "lineType": "solid",
+      "badge": "6",
+      "label": "6. Dépôt physique du chèque auprès du service Compta pour endossement",
+      "observation": {
+        "enabled": true,
+        "title": "",
+        "detail": "Absence de traçabilité ",
+        "alertType": "Amélioration"
+      }
+    },
+    {
+      "id": "stp_7",
+      "kind": "step",
+      "from": "act_3",
+      "to": "act_2",
+      "lineType": "dashed",
+      "badge": "7",
+      "label": "7. Retour du chèque endossé avec cachet commercial au dos",
+      "observation": null
+    },
+    {
+      "id": "stp_8",
+      "kind": "step",
+      "from": "act_2",
+      "to": "act_2",
+      "lineType": "solid",
+      "badge": "8",
+      "label": "8. Photocopie du chèque endossé et tirage de l'état des valeurs",
+      "observation": null
+    },
+    {
+      "id": "stp_9",
+      "kind": "step",
+      "from": "act_2",
+      "to": "act_4",
+      "lineType": "solid",
+      "badge": "9",
+      "label": "9. Présentation du chèque + État des valeurs à M. FIZAZI pour obtention du VISA",
+      "observation": {
+        "enabled": false,
+        "title": "Contrôle & Visa Direction",
+        "detail": "Validation impérative du Partner autorisant le dépôt en compte bancaire avant remise à Aziz.",
+        "alertType": "Amélioration"
+      }
+    },
+    {
+      "id": "stp_10",
+      "kind": "step",
+      "from": "act_4",
+      "to": "act_2",
+      "lineType": "dashed",
+      "badge": "10",
+      "label": "10. Visa formel accordé et autorisation de remise en banque",
+      "observation": null
+    },
+    {
+      "id": "stp_11",
+      "kind": "step",
+      "from": "act_2",
+      "to": "act_5",
+      "lineType": "solid",
+      "badge": "11",
+      "label": "11. Remise physique du chèque  au coursier",
+      "observation": {
+        "enabled": true,
+        "title": "",
+        "detail": "Absence de traçabilité",
+        "alertType": "Amélioration"
+      }
+    },
+    {
+      "id": "stp_12",
+      "kind": "step",
+      "from": "act_5",
+      "to": "act_6",
+      "lineType": "solid",
+      "badge": "12",
+      "label": "12. Dépôt physique au guichet de la banque du cabinet",
+      "observation": null
+    },
+    {
+      "id": "stp_13",
+      "kind": "step",
+      "from": "act_6",
+      "to": "act_5",
+      "lineType": "dashed",
+      "badge": "13",
+      "label": "13. Remise de l'accusé",
+      "observation": null
+    },
+    {
+      "id": "stp_14",
+      "kind": "step",
+      "from": "act_5",
+      "to": "act_2",
+      "lineType": "dashed",
+      "badge": "14",
+      "label": "14. Remise de l'accusé",
+      "observation": {
+        "enabled": true,
+        "title": "",
+        "detail": "Absence de traçabilité",
+        "alertType": "Amélioration"
+      }
+    },
+    {
+      "id": "stp_15",
+      "kind": "step",
+      "from": "act_2",
+      "to": "act_1",
+      "lineType": "dashed",
+      "badge": "15",
+      "label": "15. Dépôt de l'accusé auprès du Comptabilité interne",
+      "observation": {
+        "enabled": true,
+        "title": "Rapprochement et Lettrage",
+        "detail": "Absence de traçabilité",
+        "alertType": "Risque"
+      }
+    }
+  ]
+}

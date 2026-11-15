@@ -1,0 +1,134 @@
+{
+  "title": "LOGIGRAMME D'ÉCHANGE — PROCESSUS : GESTION DES CHÈQUES SORTANTS (FOURNISSEURS)",
+  "subtitle": "Cabinet FIZAZI (Expertise Comptable & CAC) • Paiements Fournisseurs & Prestataires",
+  "config": {
+    "colSpacing": 310,
+    "rowSpacing": 54,
+    "autoBadge": true,
+    "showTitleOnCanvas": true
+  },
+  "actors": [
+    {
+      "id": "act_1",
+      "name": "Comptabilité Interne",
+      "type": "participant"
+    },
+    {
+      "id": "act_2",
+      "name": "Secrétariat ",
+      "type": "participant"
+    },
+    {
+      "id": "act_3",
+      "name": "Coursier",
+      "type": "actor"
+    },
+    {
+      "id": "act_4",
+      "name": "Fournisseur / Prestataire",
+      "type": "actor"
+    }
+  ],
+  "items": [
+    {
+      "id": "stp_1",
+      "kind": "step",
+      "from": "act_1",
+      "to": "act_2",
+      "lineType": "solid",
+      "badge": "1",
+      "label": "1. Remise du chèque sortant établi à l'ordre du fournisseur",
+      "observation": {
+        "enabled": true,
+        "title": "",
+        "detail": "Absence de la traçabilité de la remise du chèque",
+        "alertType": "Amélioration"
+      }
+    },
+    {
+      "id": "stp_2",
+      "kind": "step",
+      "from": "act_2",
+      "to": "act_2",
+      "lineType": "solid",
+      "badge": "2",
+      "label": "2. Numérisation ",
+      "observation": null
+    },
+    {
+      "id": "stp_3",
+      "kind": "step",
+      "from": "act_2",
+      "to": "act_2",
+      "lineType": "solid",
+      "badge": "3",
+      "label": "3. Réalisation d'une photocopie ",
+      "observation": null
+    },
+    {
+      "id": "stp_4",
+      "kind": "step",
+      "from": "act_2",
+      "to": "act_3",
+      "lineType": "solid",
+      "badge": "4",
+      "label": "4. Remise du chèque original + Copie papier au coursier",
+      "observation": {
+        "enabled": true,
+        "title": "",
+        "detail": "Absence de la traçabilité de la remise du chèque",
+        "alertType": "Amélioration"
+      }
+    },
+    {
+      "id": "stp_5",
+      "kind": "step",
+      "from": "act_3",
+      "to": "act_4",
+      "lineType": "solid",
+      "badge": "5",
+      "label": "5. Remise physique du chèque au fournisseur",
+      "observation": null
+    },
+    {
+      "id": "stp_6",
+      "kind": "step",
+      "from": "act_4",
+      "to": "act_3",
+      "lineType": "dashed",
+      "badge": "6",
+      "label": "6. Accusé la réception ",
+      "observation": {
+        "enabled": false,
+        "title": "Exigence de décharge formelle",
+        "detail": "La décharge doit comporter le cachet original et la qualité lisible du signataire pour être recevable.",
+        "alertType": "Risque"
+      }
+    },
+    {
+      "id": "stp_7",
+      "kind": "step",
+      "from": "act_3",
+      "to": "act_2",
+      "lineType": "dashed",
+      "badge": "7",
+      "label": "7. Restitution l'accusé de réception",
+      "observation": {
+        "enabled": true,
+        "title": "",
+        "detail": "Absence de la traçabilité de la remise de l'accusé de réception",
+        "alertType": "Amélioration"
+      }
+    },
+    {
+      "id": "stp_8",
+      "kind": "step",
+      "from": "act_2",
+      "to": "act_2",
+      "lineType": "solid",
+      "badge": "8",
+      "label": "8. Scan de la décharge finale et classement sur Google Drive",
+      "observation": null
+    }
+  ]
+}

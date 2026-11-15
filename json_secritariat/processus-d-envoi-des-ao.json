@@ -1,0 +1,208 @@
+{
+  "title": "Processus d'Envoi des AO",
+  "subtitle": "",
+  "config": {
+    "colSpacing": 250,
+    "rowSpacing": 54,
+    "autoBadge": true,
+    "showTitleOnCanvas": true
+  },
+  "actors": [
+    {
+      "id": "act_1",
+      "name": "Pôle Marchés",
+      "type": "actor"
+    },
+    {
+      "id": "act_2",
+      "name": "Secrétariat (Fatima)",
+      "type": "actor"
+    },
+    {
+      "id": "act_3",
+      "name": "Partner",
+      "type": "actor"
+    },
+    {
+      "id": "act_4",
+      "name": "Coursier",
+      "type": "actor"
+    },
+    {
+      "id": "act_5",
+      "name": "Client / Maître d'Ouvrage",
+      "type": "actor"
+    }
+  ],
+  "items": [
+    {
+      "id": "stp_1",
+      "kind": "step",
+      "from": "act_1",
+      "to": "act_2",
+      "lineType": "solid",
+      "badge": "1",
+      "label": "1. Dépôt de dossier",
+      "observation": {
+        "enabled": true,
+        "title": "",
+        "detail": "Absence d'un dispositif de pointage des documents déposé",
+        "alertType": "Amélioration"
+      }
+    },
+    {
+      "id": "stp_2",
+      "kind": "step",
+      "from": "act_2",
+      "to": "act_2",
+      "lineType": "solid",
+      "badge": "2",
+      "label": "2. identifier le destinataire, ville, date limite",
+      "observation": null
+    },
+    {
+      "id": "stp_3",
+      "kind": "step",
+      "from": "act_2",
+      "to": "act_3",
+      "lineType": "solid",
+      "badge": "3",
+      "label": "3.Voir avec le Partner pour signer le décharge"
+    },
+    {
+      "id": "stp_4",
+      "kind": "step",
+      "from": "act_3",
+      "to": "act_2",
+      "lineType": "dashed",
+      "badge": "4",
+      "label": "4.récupérer le décharge signé"
+    },
+    {
+      "id": "stp_5",
+      "kind": "step",
+      "from": "act_2",
+      "to": "act_2",
+      "lineType": "solid",
+      "badge": "5",
+      "label": "5.Scanner le dossier et le mettre sur le drive"
+    },
+    {
+      "id": "stp_6",
+      "kind": "step",
+      "from": "act_2",
+      "to": "act_2",
+      "lineType": "solid",
+      "badge": "6",
+      "label": "6. Triage par ville & choix du canal d'acheminement"
+    },
+    {
+      "id": "stp_7",
+      "kind": "step",
+      "from": "act_2",
+      "to": "act_4",
+      "lineType": "solid",
+      "badge": "7",
+      "label": "7.Cordonner l'envoie du dossier avec le coursier",
+      "observation": {
+        "enabled": true,
+        "title": "",
+        "detail": "Absence d'un dispositif de suivi des documents echangés",
+        "alertType": "Amélioration"
+      }
+    },
+    {
+      "id": "stp_8",
+      "kind": "step",
+      "from": "act_4",
+      "to": "act_5",
+      "lineType": "solid",
+      "badge": "8",
+      "label": "8. Déposer le dossier au Bureau d'Ordre du client"
+    },
+    {
+      "id": "alt_1",
+      "kind": "alt_start",
+      "tag": "alt",
+      "condition": "Le client accepte de signer l'accusé immédiatement"
+    },
+    {
+      "id": "stp_9",
+      "kind": "step",
+      "from": "act_5",
+      "to": "act_4",
+      "lineType": "dashed",
+      "badge": "9",
+      "label": "9a. Transmettre l'accusé au coursier"
+    },
+    {
+      "id": "alt_1_else",
+      "kind": "alt_else",
+      "condition": "Le client refuse de signer avant vérification"
+    },
+    {
+      "id": "stp_10",
+      "kind": "step",
+      "from": "act_5",
+      "to": "act_4",
+      "lineType": "dashed",
+      "badge": "10",
+      "label": "9b. Refus de visa immédiat"
+    },
+    {
+      "id": "stp_11",
+      "kind": "step",
+      "from": "act_4",
+      "to": "act_2",
+      "lineType": "dashed",
+      "badge": "11",
+      "label": "11. Alerte immédiate Secrétariat"
+    },
+    {
+      "id": "alt_1_end",
+      "kind": "alt_end"
+    },
+    {
+      "id": "stp_12",
+      "kind": "step",
+      "from": "act_4",
+      "to": "act_2",
+      "lineType": "dashed",
+      "badge": "12",
+      "label": "13. Retour de la décharge signée ou récépissé Amana"
+    },
+    {
+      "id": "stp_13",
+      "kind": "step",
+      "from": "act_2",
+      "to": "act_2",
+      "lineType": "solid",
+      "badge": "13",
+      "label": "14. Scan de la décharge"
+    },
+    {
+      "id": "stp_14",
+      "kind": "step",
+      "from": "act_2",
+      "to": "act_2",
+      "lineType": "solid",
+      "badge": "14",
+      "label": "15. Mise à jour du drive"
+    },
+    {
+      "id": "stp_15",
+      "kind": "step",
+      "from": "act_2",
+      "to": "act_1",
+      "lineType": "solid",
+      "badge": "15",
+      "label": "15. Informer le département des Marchés",
+      "observation": {
+        "enabled": true,
+        "title": "",
+        "detail": "Absence de partage de la situation de dépot du dossier",
+        "alertType": "Amélioration"
+      }
+    }
+  ]
+}

@@ -15,14 +15,8 @@
       "highlight": false
     },
     {
-      "id": "act_2",
-      "name": "Télécopieur Cabinet",
-      "type": "box",
-      "highlight": false
-    },
-    {
       "id": "act_3",
-      "name": "Secrétariat (Fatima)",
+      "name": "Secrétariat ",
       "type": "box",
       "highlight": true
     },
@@ -38,7 +32,7 @@
       "id": "stp_1",
       "kind": "step",
       "from": "act_1",
-      "to": "act_2",
+      "to": "act_3",
       "lineType": "solid",
       "badge": "1",
       "label": "Transmission du document",
@@ -47,11 +41,11 @@
     {
       "id": "stp_2",
       "kind": "step",
-      "from": "act_2",
+      "from": "act_3",
       "to": "act_3",
       "lineType": "dashed",
       "badge": "2",
-      "label": "Impression physique automatique du fax entrant",
+      "label": "Impression physique ",
       "observation": {
         "enabled": false,
         "title": "Impression papier systématique",
@@ -66,7 +60,7 @@
       "to": "act_3",
       "lineType": "solid",
       "badge": "3",
-      "label": "Examen, qualification et identification du service concerné",
+      "label": "Identifier le service concerné",
       "observation": null
     },
     {
@@ -105,7 +99,7 @@
       "observation": {
         "enabled": true,
         "title": "",
-        "detail": "Absence d’un accusé de réception formel du destinataire interne avant archivage",
+        "detail": "Absence d’un accusé de réception formel ",
         "alertType": "Risque"
       }
     }

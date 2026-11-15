@@ -1,0 +1,104 @@
+{
+  "title": "LOGIGRAMME D'ÉCHANGE — PROCESSUS : GESTION DES CHÈQUES AU PORTEUR",
+  "subtitle": "Cabinet FIZAZI (Expertise Comptable & CAC) • Dépôts & Opérations Bancaires Spécifiques",
+  "config": {
+    "colSpacing": 310,
+    "rowSpacing": 54,
+    "autoBadge": true,
+    "showTitleOnCanvas": true
+  },
+  "actors": [
+    {
+      "id": "act_1",
+      "name": "Direction (M. FIZAZI)",
+      "type": "actor"
+    },
+    {
+      "id": "act_2",
+      "name": "Secrétariat (Fatima)",
+      "type": "actor"
+    },
+    {
+      "id": "act_3",
+      "name": "Coursier",
+      "type": "actor"
+    },
+    {
+      "id": "act_4",
+      "name": "Guichet Bancaire",
+      "type": "participant"
+    }
+  ],
+  "items": [
+    {
+      "id": "stp_1",
+      "kind": "step",
+      "from": "act_1",
+      "to": "act_2",
+      "lineType": "solid",
+      "badge": "1",
+      "label": "1. Remise du chèque au porteur ",
+      "observation": null
+    },
+    {
+      "id": "stp_3",
+      "kind": "step",
+      "from": "act_2",
+      "to": "act_2",
+      "lineType": "solid",
+      "badge": "3",
+      "label": "2. Numérisation (scan) et photocopie ",
+      "observation": null
+    },
+    {
+      "id": "stp_4",
+      "kind": "step",
+      "from": "act_2",
+      "to": "act_3",
+      "lineType": "solid",
+      "badge": "4",
+      "label": "3. Remise en main propre du chèque au coursier ",
+      "observation": {
+        "enabled": true,
+        "title": "",
+        "detail": "Absence de traçabilité d'échange ",
+        "alertType": "Amélioration"
+      }
+    },
+    {
+      "id": "stp_5",
+      "kind": "step",
+      "from": "act_3",
+      "to": "act_4",
+      "lineType": "solid",
+      "badge": "5",
+      "label": "4. Dépôt ou présentation au guichet bancaire de l'agence",
+      "observation": null
+    },
+    {
+      "id": "stp_6",
+      "kind": "step",
+      "from": "act_4",
+      "to": "act_3",
+      "lineType": "dashed",
+      "badge": "6",
+      "label": "5. Délivrance du récépissé de dépôt ou validation de l'opération",
+      "observation": null
+    },
+    {
+      "id": "stp_7",
+      "kind": "step",
+      "from": "act_3",
+      "to": "act_2",
+      "lineType": "dashed",
+      "badge": "7",
+      "label": "6. Restitution immédiate du récépissé bancaire au Secrétariat",
+      "observation": {
+        "enabled": true,
+        "title": "",
+        "detail": "Aucune info sur la destination des fonds ",
+        "alertType": "Amélioration"
+      }
+    }
+  ]
+}
