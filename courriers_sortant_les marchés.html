@@ -370,6 +370,26 @@
       border-color: #3b82f6;
     }
 
+    .card.obs-card {
+      background-color: rgba(14, 55, 115, 0.2);
+      border-color: rgba(2, 132, 199, 0.45);
+    }
+
+    .card.obs-card.selected {
+      border-color: #38bdf8;
+    }
+
+    /* Observation Box inside Step Card */
+    .obs-subbox {
+      background-color: rgba(12, 74, 110, 0.25);
+      border: 1px solid rgba(2, 132, 199, 0.45);
+      border-radius: 8px;
+      padding: 7px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
     .card.indented {
       margin-left: 10px;
       border-left: 3px solid rgba(245, 158, 11, 0.55);
@@ -569,30 +589,13 @@
   <!-- Top Navigation & Action Toolbar -->
   <header class="top-header">
     <div class="header-left">
+      <a href="index.html" class="btn" style="text-decoration:none;" title="Retour au portail d'accueil">🏠 Portail</a>
       <button id="toggleSidebarBtn" class="btn" title="Masquer/Afficher l'éditeur">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h10"/>
         </svg>
         <span id="toggleSidebarLabel">Éditeur</span>
       </button>
-
-      <!-- Nav Switcher -->
-      <nav class="header-nav" title="Changer de diagramme">
-        <a href="index.html" class="nav-link active">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-            <polyline points="14 2 14 8 20 8"></polyline>
-          </svg>
-          <span>1. Plis AO</span>
-        </a>
-        <a href="visites.html" class="nav-link">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-            <circle cx="9" cy="7" r="4"></circle>
-          </svg>
-          <span>2. Accueil Visiteurs</span>
-        </a>
-      </nav>
       <input type="text" id="headerDiagramTitle" class="title-input-header" value="Processus d'Envoi & Décharge des Plis AO" placeholder="Titre du diagramme..." title="Titre affiché en haut du diagramme" />
       <span id="saveStatusPill" class="save-status-pill" title="État de la sauvegarde">
         <span id="saveStatusDot" class="status-dot"></span>
@@ -636,6 +639,7 @@
         <button class="tab-btn active" data-tab="steps">Étapes (<span id="stepCountBadge">15</span>)</button>
         <button class="tab-btn" data-tab="actors">Acteurs (<span id="actorCountBadge">5</span>)</button>
         <button class="tab-btn" data-tab="alt">Bloc Alt</button>
+        <button class="tab-btn" data-tab="obs">Observations (<span id="obsCountBadge">0</span>)</button>
         <button class="tab-btn" data-tab="usb">USB & Options</button>
       </div>
 
@@ -670,7 +674,16 @@
         <div id="altBlocksContainer" class="pane-scroll"></div>
       </div>
 
-      <!-- Tab 4: USB Mobile Storage & Options -->
+      <!-- Tab 4: Observations & Synthesis Matrix -->
+      <div id="tab-obs" class="tab-pane">
+        <div class="pane-toolbar">
+          <span style="font-size:11.5px;color:#38bdf8;font-weight:600;">Encarts d'Observation Bleus</span>
+          <button id="addObsTabBtn" class="btn btn-primary btn-xs">+ Observation</button>
+        </div>
+        <div id="observationsListContainer" class="pane-scroll"></div>
+      </div>
+
+      <!-- Tab 5: USB Mobile Storage & Options -->
       <div id="tab-usb" class="tab-pane">
         <div class="pane-scroll">
           <!-- Portable USB Storage Card -->
@@ -1032,6 +1045,11 @@
         .replace(/"/g, '&quot;');
     }
 
+    function truncateText(str, max = 40) {
+      if (!str) return '';
+      return str.length > max ? (str.slice(0, max - 1) + '…') : str;
+    }
+
     function showToast(msg, isError = false) {
       const toast = document.getElementById('toastBanner');
       document.getElementById('toastText').textContent = msg;
@@ -1084,17 +1102,24 @@
         actorXMap[act.id] = leftMargin + idx * colSpacing;
       });
 
+      const lastActorX = actors.length > 0 ? actorXMap[actors[actors.length - 1].id] : leftMargin + 700;
+      const hasAnyObservations = items.some(it => it.kind === 'step' && it.observation && it.observation.enabled);
+      const obsBoxX = lastActorX + 115;
+      const obsBoxW = 285;
+      const rightEdgeMargin = hasAnyObservations ? (obsBoxW + 150) : rightMargin;
+
       const computedWidth = Math.max(
-        1060,
+        1120,
         actors.length > 0
-          ? leftMargin + (actors.length - 1) * colSpacing + rightMargin
-          : 1060
+          ? lastActorX + rightEdgeMargin
+          : 1120
       );
 
       let currentY = lifelineStartY + 38;
       const layoutEntries = [];
       const altStack = [];
       let badgeCounter = 1;
+      const activeObservations = [];
 
       items.forEach((item) => {
         if (item.kind === 'alt_start') {
@@ -1143,6 +1168,18 @@
             });
           }
 
+          if (isValid && item.observation && item.observation.enabled) {
+            const x1 = actorXMap[item.from];
+            const x2 = actorXMap[item.to];
+            const anchorX = isSelf ? (x1 + 38) : (Math.max(x1, x2) + 12);
+            activeObservations.push({
+              stepItem: item,
+              badgeNum,
+              y: currentY,
+              anchorX
+            });
+          }
+
           layoutEntries.push({
             type: 'step',
             item,
@@ -1162,7 +1199,9 @@
       }
 
       const lifelineEndY = Math.max(currentY + 24, 500);
-      const computedHeight = lifelineEndY + 30;
+      const hasMatrix = activeObservations.length > 0;
+      const matrixHeight = hasMatrix ? (60 + activeObservations.length * 40 + 20) : 0;
+      const computedHeight = lifelineEndY + 30 + matrixHeight;
 
       baseSvgWidth = computedWidth;
       baseSvgHeight = computedHeight;
@@ -1326,6 +1365,83 @@
         out += `</g>`;
       });
 
+      // Encarts bleus d'OBSERVATION à droite reliés par une ligne pointillée bleue
+      activeObservations.forEach((obsEntry) => {
+        const { stepItem, y, anchorX } = obsEntry;
+        const obs = stepItem.observation;
+        const isSel = selectedItemId === stepItem.id;
+        const boxH = 44;
+        const boxY = y - 16;
+
+        const obsHeader = obs.title && obs.title.trim().length > 0
+          ? `OBSERVATION: ${obs.title.trim()}`
+          : 'OBSERVATION:';
+        const obsDetail = obs.detail || '';
+
+        out += `<g class="svg-interactive" data-select-id="${stepItem.id}" data-select-type="obs">`;
+        out += `<circle cx="${anchorX}" cy="${y}" r="2.8" fill="#0ea5e9" />`;
+        out += `<line x1="${anchorX + 4}" y1="${y}" x2="${obsBoxX}" y2="${y}" stroke="#0284c7" stroke-width="1.3" stroke-dasharray="3,3" />`;
+        out += `<rect x="${obsBoxX}" y="${boxY}" width="${obsBoxW}" height="${boxH}" rx="5" fill="#0c2638" stroke="${isSel ? '#38bdf8' : '#0284c7'}" stroke-width="${isSel ? '1.8' : '1.2'}" />`;
+        out += `<rect x="${obsBoxX + 10}" y="${boxY + 9}" width="13" height="13" rx="2.5" fill="#38bdf8" />`;
+        out += `<text x="${obsBoxX + 16.5}" y="${boxY + 19}" text-anchor="middle" fill="#0c2638" font-size="10" font-weight="800">i</text>`;
+        out += `<text x="${obsBoxX + 29}" y="${boxY + 19}" fill="#7dd3fc" font-size="11" font-weight="700">${escapeXml(truncateText(obsHeader, 42))}</text>`;
+        out += `<text x="${obsBoxX + 29}" y="${boxY + 34}" fill="#e0f2fe" font-size="10.5" font-weight="400">${escapeXml(truncateText(obsDetail, 46))}</text>`;
+        out += `</g>`;
+      });
+
+      // Matrice de Synthèse des Risques & Pistes d'Amélioration du Processus
+      if (hasMatrix) {
+        const matrixStartY = lifelineEndY + 36;
+        const tableX = 36;
+        const tableW = Math.max(1060, baseSvgWidth - 72);
+        const tableStartY = matrixStartY + 28;
+
+        out += `
+          <g>
+            <circle cx="${tableX + 10}" cy="${matrixStartY + 10}" r="8" fill="#0284c7" />
+            <path d="M ${tableX + 6.5} ${matrixStartY + 8} L ${tableX + 9} ${matrixStartY + 12} L ${tableX + 14} ${matrixStartY + 6}" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+            <text x="${tableX + 26}" y="${matrixStartY + 15}" fill="#ffffff" font-size="14.5" font-weight="700">Matrice de Synthèse des Risques &amp; Pistes d'Amélioration du Processus</text>
+          </g>
+        `;
+
+        const totalRowsHeight = 32 + activeObservations.length * 38;
+        out += `<rect x="${tableX}" y="${tableStartY}" width="${tableW}" height="${totalRowsHeight}" rx="7" fill="#14171f" stroke="#262c3b" stroke-width="1" />`;
+
+        const col1W = 60;
+        const col2W = 320;
+        const col3W = 160;
+
+        out += `
+          <rect x="${tableX}" y="${tableStartY}" width="${tableW}" height="32" rx="7" fill="#1b212d" />
+          <line x1="${tableX}" y1="${tableStartY + 32}" x2="${tableX + tableW}" y2="${tableStartY + 32}" stroke="#262c3b" stroke-width="1" />
+          <text x="${tableX + 16}" y="${tableStartY + 21}" fill="#94a3b8" font-size="11" font-weight="600">Étape</text>
+          <text x="${tableX + col1W + 16}" y="${tableStartY + 21}" fill="#94a3b8" font-size="11" font-weight="600">Flux Concerné</text>
+          <text x="${tableX + col1W + col2W + 16}" y="${tableStartY + 21}" fill="#94a3b8" font-size="11" font-weight="600">Type d'Alerte</text>
+          <text x="${tableX + col1W + col2W + col3W + 16}" y="${tableStartY + 21}" fill="#94a3b8" font-size="11" font-weight="600">Risque ou Piste d'Amélioration Recommandée</text>
+        `;
+
+        activeObservations.forEach((obsEntry, idx) => {
+          const rowY = tableStartY + 32 + idx * 38;
+          const { stepItem, badgeNum } = obsEntry;
+          const obs = stepItem.observation;
+          const rowBg = idx % 2 === 0 ? 'rgba(255,255,255,0.015)' : 'rgba(255,255,255,0.035)';
+          const recText = (obs.title && obs.title.trim() ? (obs.title.trim() + ' : ') : '') + (obs.detail || '');
+
+          out += `
+            <rect x="${tableX}" y="${rowY}" width="${tableW}" height="${38}" fill="${rowBg}" />
+            ${idx < activeObservations.length - 1 ? `<line x1="${tableX}" y1="${rowY + 38}" x2="${tableX + tableW}" y2="${rowY + 38}" stroke="#222834" stroke-width="1" />` : ''}
+            <circle cx="${tableX + 28}" cy="${rowY + 19}" r="9.5" fill="#ffffff" />
+            <text x="${tableX + 28}" y="${rowY + 22.5}" text-anchor="middle" fill="#111827" font-size="10.5" font-weight="700">${escapeXml(badgeNum)}</text>
+            <text x="${tableX + col1W + 16}" y="${rowY + 23}" fill="#e2e8f0" font-size="11.5" font-weight="400">${escapeXml(truncateText(stepItem.label, 45))}</text>
+            <g transform="translate(${tableX + col1W + col2W + 16}, ${rowY + 11})">
+              <text x="0" y="12" font-size="12">💡</text>
+              <text x="18" y="12" fill="#f59e0b" font-size="11.5" font-weight="700">${escapeXml(obs.alertType || 'Amélioration')}</text>
+            </g>
+            <text x="${tableX + col1W + col2W + col3W + 16}" y="${rowY + 23}" fill="#cbd5e1" font-size="11.5" font-weight="400">${escapeXml(recText)}</text>
+          `;
+        });
+      }
+
       svg.innerHTML = out;
 
       // Click-to-select on SVG elements
@@ -1336,7 +1452,9 @@
           const type = el.getAttribute('data-select-type');
           selectedItemId = id;
           if (!sidebarVisible) toggleSidebar(true);
-          switchTab(type === 'actor' ? 'actors' : 'steps');
+          if (type === 'actor') switchTab('actors');
+          else if (type === 'obs') switchTab('obs');
+          else switchTab('steps');
           renderSidebar();
           renderDiagram();
           setTimeout(() => {
@@ -1378,8 +1496,10 @@
       renderActorsList();
       renderStepsList();
       renderAltBlocksTab();
+      renderObservationsList();
       document.getElementById('actorCountBadge').textContent = state.actors.length;
       document.getElementById('stepCountBadge').textContent = state.items.filter(i => i.kind === 'step').length;
+      document.getElementById('obsCountBadge').textContent = state.items.filter(i => i.kind === 'step' && i.observation && i.observation.enabled).length;
     }
 
     function renderActorsList() {
@@ -1531,6 +1651,7 @@
         const badgeNum = state.config.autoBadge ? badgeCounter++ : (item.badge || badgeCounter++);
         const optsFrom = state.actors.map(a => `<option value="${a.id}" ${a.id === item.from ? 'selected' : ''}>${escapeHtml(a.name)}</option>`).join('');
         const optsTo = state.actors.map(a => `<option value="${a.id}" ${a.id === item.to ? 'selected' : ''}>${escapeHtml(a.name)}</option>`).join('');
+        const hasObs = Boolean(item.observation && item.observation.enabled);
 
         return `
           <div data-card-id="${item.id}" class="card ${insideAlt ? 'indented' : ''} ${isSel ? 'selected' : ''}">
@@ -1544,6 +1665,9 @@
                   <option value="solid" ${item.lineType === 'solid' ? 'selected' : ''}>Pleine (──▶)</option>
                   <option value="dashed" ${item.lineType === 'dashed' ? 'selected' : ''}>Pointillée (- - ▶)</option>
                 </select>
+                <button data-toggle-obs="${item.id}" class="btn btn-xs" style="${hasObs ? 'background:#0369a1;border-color:#38bdf8;color:#fff;' : 'color:#7dd3fc;'}" title="Ajouter/Retirer un encart Observation bleu">
+                  ${hasObs ? 'Obs ✓' : '+ Obs'}
+                </button>
               </div>
               ${controls}
             </div>
@@ -1553,9 +1677,65 @@
               <select data-step-to="${item.id}" class="form-select" style="font-size:11px;">${optsTo}</select>
             </div>
             <input type="text" data-step-label="${item.id}" value="${escapeHtml(item.label)}" class="form-input" placeholder="Libellé du message..." />
+            ${hasObs ? `
+              <div class="obs-subbox">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                  <span style="font-size:10.5px;font-weight:700;color:#7dd3fc;">ENCART OBSERVATION BLEU</span>
+                  <select data-obs-alert="${item.id}" class="form-select" style="width:auto;padding:2px 6px;font-size:10.5px;">
+                    <option value="Amélioration" ${(item.observation.alertType || 'Amélioration') === 'Amélioration' ? 'selected' : ''}>Amélioration</option>
+                    <option value="Risque" ${item.observation.alertType === 'Risque' ? 'selected' : ''}>Risque</option>
+                  </select>
+                </div>
+                <input type="text" data-obs-title="${item.id}" value="${escapeHtml(item.observation.title || '')}" class="form-input" style="font-size:11px;padding:4px 7px;" placeholder="Titre court (optionnel)..." />
+                <input type="text" data-obs-detail="${item.id}" value="${escapeHtml(item.observation.detail || '')}" class="form-input" style="font-size:11px;padding:4px 7px;" placeholder="Description de l'observation..." />
+              </div>
+            ` : ''}
           </div>
         `;
       }).join('');
+
+      container.querySelectorAll('[data-toggle-obs]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const it = state.items.find(x => x.id === btn.getAttribute('data-toggle-obs'));
+          if (!it) return;
+          if (it.observation && it.observation.enabled) {
+            it.observation.enabled = false;
+            showToast('Observation masquée');
+          } else {
+            it.observation = {
+              enabled: true,
+              title: it.observation?.title || '',
+              detail: it.observation?.detail || 'Nouvelle observation sur cette étape',
+              alertType: it.observation?.alertType || 'Amélioration'
+            };
+            showToast('Observation ajoutée');
+          }
+          saveState();
+          renderSidebar();
+          renderDiagram();
+        });
+      });
+
+      container.querySelectorAll('[data-obs-title]').forEach(inp => {
+        inp.addEventListener('input', (e) => {
+          const it = state.items.find(x => x.id === e.target.getAttribute('data-obs-title'));
+          if (it && it.observation) { it.observation.title = e.target.value; saveState(); renderObservationsList(); renderDiagram(); }
+        });
+      });
+
+      container.querySelectorAll('[data-obs-detail]').forEach(inp => {
+        inp.addEventListener('input', (e) => {
+          const it = state.items.find(x => x.id === e.target.getAttribute('data-obs-detail'));
+          if (it && it.observation) { it.observation.detail = e.target.value; saveState(); renderObservationsList(); renderDiagram(); }
+        });
+      });
+
+      container.querySelectorAll('[data-obs-alert]').forEach(sel => {
+        sel.addEventListener('change', (e) => {
+          const it = state.items.find(x => x.id === e.target.getAttribute('data-obs-alert'));
+          if (it && it.observation) { it.observation.alertType = e.target.value; saveState(); renderObservationsList(); renderDiagram(); }
+        });
+      });
 
       container.querySelectorAll('[data-step-label]').forEach(inp => {
         inp.addEventListener('input', (e) => {
@@ -1706,6 +1886,147 @@
           renderSidebar();
           renderDiagram();
           showToast('Condition supprimée');
+        });
+      });
+    }
+
+    /**
+     * Onglet dédié à la gestion des Observations et de la Matrice des Risques
+     */
+    function renderObservationsList() {
+      const container = document.getElementById('observationsListContainer');
+      if (!container) return;
+
+      const allSteps = [];
+      let badgeCounter = 1;
+      state.items.forEach(item => {
+        if (item.kind === 'step') {
+          const num = state.config.autoBadge ? String(badgeCounter++) : (item.badge || String(badgeCounter++));
+          allSteps.push({ id: item.id, badgeNum: num, label: item.label });
+        }
+      });
+
+      const obsEntries = [];
+      state.items.forEach(item => {
+        if (item.kind === 'step' && item.observation && item.observation.enabled) {
+          const stp = allSteps.find(s => s.id === item.id);
+          obsEntries.push({ item, num: stp ? stp.badgeNum : '?' });
+        }
+      });
+
+      const addObsBtn = document.getElementById('addObsTabBtn');
+      if (addObsBtn) {
+        addObsBtn.onclick = () => {
+          const steps = state.items.filter(it => it.kind === 'step');
+          if (steps.length === 0) {
+            showToast('Aucune étape disponible', true);
+            return;
+          }
+          let targetStep = steps.find(it => !it.observation || !it.observation.enabled);
+          if (!targetStep) targetStep = steps[0];
+          targetStep.observation = {
+            enabled: true,
+            title: '',
+            detail: 'Nouvelle observation sur cette étape',
+            alertType: 'Amélioration'
+          };
+          selectedItemId = targetStep.id;
+          saveState();
+          renderSidebar();
+          renderDiagram();
+          showToast('Observation créée');
+        };
+      }
+
+      if (obsEntries.length === 0) {
+        container.innerHTML = `<div style="text-align:center;font-size:12px;color:#9ca3af;padding:20px;">Aucune observation active. Cliquez sur "+ Observation" ci-dessus ou sur "+ Obs" sur une étape pour en ajouter une.</div>`;
+        return;
+      }
+
+      container.innerHTML = obsEntries.map(({ item, num }) => {
+        const obs = item.observation;
+        const isSel = selectedItemId === item.id;
+        const stepOpts = allSteps.map(s => `
+          <option value="${s.id}" ${s.id === item.id ? 'selected' : ''}>
+            Étape ${s.badgeNum} : ${escapeHtml(truncateText(s.label, 28))}
+          </option>
+        `).join('');
+
+        return `
+          <div data-card-id="${item.id}" class="card obs-card ${isSel ? 'selected' : ''}">
+            <div class="card-header">
+              <div style="display:flex;align-items:center;gap:6px;">
+                <span class="badge-pill">${num}</span>
+                <span style="font-size:11px;font-weight:700;color:#7dd3fc;">OBSERVATION</span>
+              </div>
+              <button data-obs-remove="${item.id}" class="btn btn-danger btn-xs" title="Supprimer cette observation">✕</button>
+            </div>
+            <div>
+              <label style="font-size:10.5px;color:#9ca3af;display:block;margin-bottom:3px;">Liée à l'étape :</label>
+              <select data-obs-link-step="${item.id}" class="form-select" style="font-size:11px;">
+                ${stepOpts}
+              </select>
+            </div>
+            <select data-obs-tab-alert="${item.id}" class="form-select" style="font-size:11px;">
+              <option value="Amélioration" ${(obs.alertType || 'Amélioration') === 'Amélioration' ? 'selected' : ''}>Type : Amélioration</option>
+              <option value="Risque" ${obs.alertType === 'Risque' ? 'selected' : ''}>Type : Risque</option>
+            </select>
+            <input type="text" data-obs-tab-title="${item.id}" value="${escapeHtml(obs.title || '')}" class="form-input" placeholder="Titre court (ex: Visa Partner)..." />
+            <input type="text" data-obs-tab-detail="${item.id}" value="${escapeHtml(obs.detail || '')}" class="form-input" placeholder="Détail de l'observation..." />
+          </div>
+        `;
+      }).join('');
+
+      container.querySelectorAll('[data-obs-link-step]').forEach(sel => {
+        sel.addEventListener('change', (e) => {
+          const fromId = e.target.getAttribute('data-obs-link-step');
+          const toId = e.target.value;
+          if (fromId === toId) return;
+          const fromStep = state.items.find(x => x.id === fromId);
+          const toStep = state.items.find(x => x.id === toId);
+          if (fromStep && toStep) {
+            toStep.observation = fromStep.observation;
+            fromStep.observation = null;
+            selectedItemId = toStep.id;
+            saveState();
+            renderSidebar();
+            renderDiagram();
+            showToast('Observation liée à la nouvelle étape');
+          }
+        });
+      });
+
+      container.querySelectorAll('[data-obs-tab-title]').forEach(inp => {
+        inp.addEventListener('input', (e) => {
+          const it = state.items.find(x => x.id === e.target.getAttribute('data-obs-tab-title'));
+          if (it && it.observation) { it.observation.title = e.target.value; saveState(); renderStepsList(); renderDiagram(); }
+        });
+      });
+
+      container.querySelectorAll('[data-obs-tab-detail]').forEach(inp => {
+        inp.addEventListener('input', (e) => {
+          const it = state.items.find(x => x.id === e.target.getAttribute('data-obs-tab-detail'));
+          if (it && it.observation) { it.observation.detail = e.target.value; saveState(); renderStepsList(); renderDiagram(); }
+        });
+      });
+
+      container.querySelectorAll('[data-obs-tab-alert]').forEach(sel => {
+        sel.addEventListener('change', (e) => {
+          const it = state.items.find(x => x.id === e.target.getAttribute('data-obs-tab-alert'));
+          if (it && it.observation) { it.observation.alertType = e.target.value; saveState(); renderStepsList(); renderDiagram(); }
+        });
+      });
+
+      container.querySelectorAll('[data-obs-remove]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const it = state.items.find(x => x.id === btn.getAttribute('data-obs-remove'));
+          if (it && it.observation) {
+            it.observation.enabled = false;
+            saveState();
+            renderSidebar();
+            renderDiagram();
+            showToast('Observation supprimée');
+          }
         });
       });
     }
