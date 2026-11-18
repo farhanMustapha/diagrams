@@ -760,8 +760,8 @@
         },
         actors: [
           { id: 'act_1', name: 'Provenance / Émetteur', type: 'box', highlight: false },
-          { id: 'act_2', name: 'Secrétariat (Fatima)', type: 'box', highlight: true },
-          { id: 'act_3', name: 'M. FIZAZI (Partner)', type: 'box', highlight: true },
+          { id: 'act_2', name: 'Secrétariat ', type: 'box', highlight: true },
+          { id: 'act_3', name: 'Managing Partner', type: 'box', highlight: false },
           { id: 'act_4', name: 'Services / Personnes Concernées', type: 'box', highlight: false }
         ],
         items: [
@@ -772,8 +772,13 @@
             to: 'act_2',
             lineType: 'solid',
             badge: '1',
-            label: '1. Réception',
-            observation: null
+            label: '1. La secrétaire reçoit les documents',
+            observation: {
+              enabled: true,
+              title: '',
+              detail: "Aucun accusé de réception n'est remis à l'émetteur (audit cloud),\nDifficulté de identifier le destinataire\nAbsence d'un dispositif de pointage des documents echangés",
+              alertType: 'Amélioration'
+            }
           },
           {
             id: 'stp_2',
@@ -792,13 +797,18 @@
             to: 'act_2',
             lineType: 'solid',
             badge: '3',
-            label: '3. Scanne',
-            observation: {
-              enabled: true,
-              title: 'Contrôle qualité & Résolution',
-              detail: 'Vérifier la lisibilité complète des pièces numérisées avant transmission électronique',
-              alertType: 'Amélioration'
-            }
+            label: '3. Scanner les documents',
+            observation: null
+          },
+          {
+            id: 'stp_5',
+            kind: 'step',
+            from: 'act_2',
+            to: 'act_3',
+            lineType: 'solid',
+            badge: '5',
+            label: '5. Informer M. FIZAZI',
+            observation: null
           },
           {
             id: 'stp_4',
@@ -811,35 +821,25 @@
             observation: null
           },
           {
-            id: 'stp_5',
-            kind: 'step',
-            from: 'act_2',
-            to: 'act_3',
-            lineType: 'solid',
-            badge: '5',
-            label: '5. Recontrôler par M. FIZAZI',
-            observation: {
-              enabled: true,
-              title: 'Validation & Visa Partner',
-              detail: 'Revue préalable de conformité par M. FIZAZI avant classement ou distribution',
-              alertType: 'Risque'
-            }
-          },
-          {
             id: 'stp_6',
             kind: 'step',
-            from: 'act_3',
+            from: 'act_2',
             to: 'act_4',
             lineType: 'solid',
             badge: '6',
             label: '6. Distribution ou dépôt au service concerné',
-            observation: null
+            observation: {
+              enabled: true,
+              title: '',
+              detail: "Absence d'un dispositif de pointage des documents échangés",
+              alertType: 'Amélioration'
+            }
           }
         ]
       };
     }
 
-    const STORAGE_KEY = 'uml_seq_courriers_entrants_v1';
+    const STORAGE_KEY = 'uml_seq_courriers_entrants_v2';
     let state = loadState() || getDefaultDiagramData();
     let selectedItemId = null;
     let currentZoom = 1.0;

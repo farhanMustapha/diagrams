@@ -22,9 +22,9 @@
     },
     {
       "id": "act_3",
-      "name": "M. FIZAZI ",
+      "name": "Managing Partner",
       "type": "box",
-      "highlight": true
+      "highlight": false
     },
     {
       "id": "act_4",
@@ -41,7 +41,7 @@
       "to": "act_2",
       "lineType": "solid",
       "badge": "1",
-      "label": "1. Réception",
+      "label": "1. La secrétaire reçoit les documents",
       "observation": {
         "enabled": true,
         "title": "",
@@ -66,23 +66,13 @@
       "to": "act_2",
       "lineType": "solid",
       "badge": "3",
-      "label": "3. Scanne",
+      "label": "3. Scanner les documents",
       "observation": {
         "enabled": false,
         "title": "Contrôle qualité & Résolution",
         "detail": "Vérifier la lisibilité complète des pièces numérisées avant transmission électronique",
         "alertType": "Amélioration"
       }
-    },
-    {
-      "id": "stp_4",
-      "kind": "step",
-      "from": "act_2",
-      "to": "act_4",
-      "lineType": "solid",
-      "badge": "4",
-      "label": "4. Envoi par Email aux personnes concernées",
-      "observation": null
     },
     {
       "id": "stp_5",
@@ -100,9 +90,19 @@
       }
     },
     {
+      "id": "stp_4",
+      "kind": "step",
+      "from": "act_2",
+      "to": "act_4",
+      "lineType": "solid",
+      "badge": "4",
+      "label": "4. Envoi par Email aux personnes concernées",
+      "observation": null
+    },
+    {
       "id": "stp_6",
       "kind": "step",
-      "from": "act_3",
+      "from": "act_2",
       "to": "act_4",
       "lineType": "solid",
       "badge": "6",
